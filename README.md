@@ -8,13 +8,13 @@
 
 ![主界面](docs/screenshots/hero.webp)
 
-> 截图使用内置 SVG 场景；把 Seedream 生成的 16:9 高清图放进 `public/scenes/`，主界面会自动切换为照片场景（无需改代码）。
+> 截图使用仓库内的 Seedream 16:9 高清场景图；替换 `public/scenes/` 下的同名文件即可换景。
 
 ## 它是什么
 
 - **场景**：雨夜书房 / 黄昏图书馆 / 清晨书桌。支持 **16:9 高清摄影场景**（放进 `public/scenes/` 自动启用，带淡入与压暗层），缺图时回退到原创 SVG 房间。生成提示词见 [docs/scene-prompts.md](docs/scene-prompts.md)。
 - **计时**：番茄钟 / 倒计时 / 秒表，支持自定义时长、轮数、自动开始休息。
-- **耄耋巡查**：专注中老猫会不定时查岗，15 秒内按空格或点「喵」；切走标签页超时会扣星。三颗星扣光，这一轮作废。
+- **耄耋突袭**：专注中老猫会不定时从**窗边或屏幕边缘**探出头来，15 秒内按空格或点「喵」；切走标签页超时，它会**张嘴哈气**、扣星，三颗星扣光这一轮作废。探头/哈气支持绿幕视频实时抠像（`public/supervisor/peek.mp4`、`yell.mp4`），没放视频时回退到静态贴纸。
 - **只监督在场**：不打开摄像头，不读屏幕，只看你是否还在、是否应声。
 - **成长**：小鱼干、连续天数、5 级「猫的认可」、13 个成就、专注历史与 7 日统计。
 - **离线可用**：PWA，可安装到桌面/主屏；断网后第二次打开仍能继续。
@@ -113,13 +113,14 @@ src/
   lib/            纯函数：计时状态机、巡查规则、进度/成就、统计、存储、音频
   data/           场景、成就、猫台词、等级
 docs/
-  product.md      玩法、公式、状态机、存储
-  scene-prompts.md  Seedream 高清场景提示词
-  research/       两套竞品拆解与品类研究
-  screenshots/    README 截图
+  product.md       玩法、公式、状态机、存储
+  scene-prompts.md Seedream 高清场景提示词
+  video-prompts.md 耄耋探头/哈气视频提示词
+  research/        两套竞品拆解与品类研究
+  screenshots/     README 截图
 public/
-  scenes/         可选的高清场景图（缺图自动回退 SVG）
-  supervisor/     耄耋肖像
+  scenes/         高清场景图（缺图自动回退 SVG）
+  supervisor/     耄耋肖像、探头贴纸、可选视频
   audio/          雨声循环
   icons/          PWA 图标
 scripts/          素材处理脚本
@@ -153,3 +154,4 @@ scripts/          素材处理脚本
 - [在线自习室品类图谱](docs/research/03-landscape.md)
 - [LearningRoom 架构建议](docs/research/04-learningroom-proposal.md)
 - [高清场景生成提示词](docs/scene-prompts.md)
+- [耄耋探头/哈气视频提示词](docs/video-prompts.md)

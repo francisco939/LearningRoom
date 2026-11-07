@@ -456,6 +456,12 @@ button {
   filter: saturate(0.96) contrast(1.03) brightness(0.94);
 }
 
+.portrait.is-away {
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
 .portrait-plaque {
   margin-top: 10px;
   text-align: center;
@@ -492,6 +498,140 @@ button {
   background: radial-gradient(circle at 50% 35%, #4a3524, #1a120c 70%);
 }
 
+/* ---------- peeking supervisor ---------- */
+
+.peek {
+  position: absolute;
+  z-index: 26;
+  width: clamp(150px, 16vw, 232px);
+  pointer-events: none;
+}
+
+.peek-inner {
+  position: relative;
+  animation: peek-in 0.42s cubic-bezier(0.2, 1.2, 0.3, 1);
+}
+
+.peek-cat {
+  position: relative;
+}
+
+.peek-static {
+  transition: opacity 200ms ease;
+}
+
+.peek-static.is-hidden {
+  opacity: 0;
+}
+
+.peek-img {
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 22px 32px rgba(0, 0, 0, 0.55));
+  user-select: none;
+}
+
+.peek-video-source {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.peek-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 32px rgba(0, 0, 0, 0.55));
+}
+
+.peek-window {
+  left: 4.5%;
+  top: 10%;
+}
+
+.peek-left {
+  left: -3%;
+  top: 28%;
+}
+
+.peek-right {
+  right: -2%;
+  top: 23%;
+}
+
+.peek-right .peek-img {
+  transform: scaleX(-1);
+}
+
+.peek-bottom {
+  left: 50%;
+  bottom: -5%;
+  transform: translateX(-50%);
+}
+
+.peek[data-tone='yell'] .peek-inner {
+  animation: none;
+}
+
+.peek[data-tone='yell'] .peek-cat {
+  animation: cat-lunge 0.55s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.peek .peek-bubble {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 4%;
+  width: 216px;
+  pointer-events: auto;
+}
+
+.peek-right .peek-bubble {
+  left: auto;
+  right: calc(100% + 10px);
+}
+
+.peek-bottom .peek-bubble {
+  left: 50%;
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+}
+
+.peek-shout {
+  position: absolute;
+  left: 52%;
+  top: -10%;
+  transform: translateX(-50%) rotate(-8deg);
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4vw, 54px);
+  line-height: 1;
+  color: #ffe1cf;
+  white-space: nowrap;
+  text-shadow:
+    0 3px 0 #7a1f14,
+    0 0 30px rgba(220, 80, 50, 0.85);
+  animation: shout 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.cat-yell-mouth {
+  position: absolute;
+  left: 50%;
+  top: 69%;
+  width: 24%;
+  transform: translate(-50%, -50%);
+  transform-origin: 50% 30%;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.45));
+  animation: mouth-open 0.3s ease-out;
+}
+
+.stage-shake {
+  animation: stage-shake 0.45s ease-in-out;
+}
+
 /* ---------- overlays ---------- */
 
 .grain {
@@ -515,6 +655,7 @@ button {
 .scene-flash {
   position: absolute;
   inset: 0;
+  z-index: 40;
   pointer-events: none;
   background: radial-gradient(circle, transparent 30%, rgba(192, 80, 60, 0.45) 100%);
   animation: flash 0.9s ease-out forwards;
@@ -599,12 +740,18 @@ button {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(10, 7, 5, 0.52) 0%,
-    rgba(10, 7, 5, 0.26) 46%,
-    transparent 70%
+    rgba(10, 7, 5, 0.64) 0%,
+    rgba(10, 7, 5, 0.32) 46%,
+    transparent 72%
   );
   filter: blur(6px);
   pointer-events: none;
+}
+
+.timer-digits {
+  text-shadow:
+    0 2px 24px rgba(0, 0, 0, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .dial {
@@ -731,6 +878,82 @@ button {
   }
 }
 
+@keyframes peek-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(5px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes cat-lunge {
+  0% {
+    transform: scale(1) translateY(0);
+  }
+  28% {
+    transform: scale(1.14) translateY(6px);
+  }
+  55% {
+    transform: scale(1.06) translateY(2px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes mouth-open {
+  from {
+    transform: translate(-50%, -50%) scaleY(0.12);
+  }
+  to {
+    transform: translate(-50%, -50%) scaleY(1);
+  }
+}
+
+@keyframes shout {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) rotate(-8deg) scale(0.4);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(-50%) rotate(-8deg) scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) rotate(-8deg) scale(1);
+  }
+}
+
+@keyframes stage-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  15% {
+    transform: translate(-7px, 4px);
+  }
+  30% {
+    transform: translate(6px, -3px);
+  }
+  45% {
+    transform: translate(-5px, 2px);
+  }
+  60% {
+    transform: translate(4px, -2px);
+  }
+  80% {
+    transform: translate(-2px, 1px);
+  }
+}
+
 @keyframes flash {
   0% {
     opacity: 0.9;
@@ -776,6 +999,32 @@ button {
   .portrait-plaque {
     font-size: 9px;
     margin-top: 6px;
+  }
+  .peek {
+    width: 132px;
+  }
+  .peek-window {
+    left: 3%;
+    top: 10%;
+  }
+  .peek-right {
+    right: -4%;
+    top: 20%;
+  }
+  .peek-left {
+    left: -6%;
+    top: 24%;
+  }
+  .peek .peek-bubble {
+    width: 176px;
+    left: calc(100% + 6px);
+    top: 0;
+  }
+  .peek-right .peek-bubble {
+    right: calc(100% + 6px);
+  }
+  .peek-shout {
+    font-size: 32px;
   }
   .desk-books {
     left: 6%;

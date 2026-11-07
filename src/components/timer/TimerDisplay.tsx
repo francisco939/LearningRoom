@@ -39,7 +39,7 @@ export function TimerDisplay({ remaining, phase, mode, round, totalRounds }: Tim
 
       <div
         className={cn(
-          'tabular font-display leading-none text-paper',
+          'timer-digits tabular font-display leading-none text-paper',
           'text-[clamp(64px,13.5vw,164px)]',
           'drop-shadow-[0_18px_40px_rgba(0,0,0,0.55)]',
         )}

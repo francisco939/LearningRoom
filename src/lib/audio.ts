@@ -52,6 +52,47 @@ class Ambience {
     requestAnimationFrame(step)
   }
 
+  async hiss(): Promise<void> {
+    try {
+      const ctx = this.ensureContext()
+      if (!ctx) return
+      await ctx.resume()
+      const duration = 0.55
+      const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate)
+      const data = buffer.getChannelData(0)
+      for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1
+
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      const band = ctx.createBiquadFilter()
+      band.type = 'bandpass'
+      band.frequency.value = 1900
+      band.Q.value = 0.8
+      const gain = ctx.createGain()
+      const t0 = ctx.currentTime
+      gain.gain.setValueAtTime(0.0001, t0)
+      gain.gain.exponentialRampToValueAtTime(0.22, t0 + 0.03)
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration)
+      source.connect(band).connect(gain).connect(ctx.destination)
+      source.start(t0)
+      source.stop(t0 + duration)
+
+      const growl = ctx.createOscillator()
+      const growlGain = ctx.createGain()
+      growl.type = 'sawtooth'
+      growl.frequency.setValueAtTime(120, t0)
+      growl.frequency.exponentialRampToValueAtTime(70, t0 + duration)
+      growlGain.gain.setValueAtTime(0.0001, t0)
+      growlGain.gain.exponentialRampToValueAtTime(0.05, t0 + 0.04)
+      growlGain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration)
+      growl.connect(growlGain).connect(ctx.destination)
+      growl.start(t0)
+      growl.stop(t0 + duration)
+    } catch {
+      /* audio is optional */
+    }
+  }
+
   async chime(kind: 'done' | 'break' = 'done'): Promise<void> {
     try {
       const ctx = this.ensureContext()

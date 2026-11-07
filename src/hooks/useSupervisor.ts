@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useSession } from '@/store/useSession'
 import { useSettings } from '@/store/useSettings'
 import { configFor, judgeAway, nextPatrolAt, withinCooldown } from '@/lib/supervision'
+import { pickAnchor } from '@/lib/peek'
 
 export function useSupervisor(): void {
   const status = useSession((s) => s.timer.status)
@@ -34,13 +35,16 @@ export function useSupervisor(): void {
     }
     const now = Date.now()
     const cfg = configFor(supervision)
+    const scene = useSettings.getState().settings.scene
+    const anchor = pickAnchor(scene)
     hasPatrolled.current = true
-    useSession.getState().setPatrol(now + cfg.checkInMs)
+    useSession.getState().setPatrol(now + cfg.checkInMs, anchor)
     lastActivity.current = now
     if (checkinTimer.current) window.clearTimeout(checkinTimer.current)
     checkinTimer.current = window.setTimeout(() => {
       if (!useSession.getState().patrol) return
       lastViolation.current = Date.now()
+      useSession.getState().showPeek(anchor, 'yell')
       useSession.getState().violation('no-checkin')
       useSession.getState().clearPatrol()
     }, cfg.checkInMs)
@@ -101,6 +105,7 @@ export function useSupervisor(): void {
       if (!judgeAway(hiddenMs, cfg)) return
       if (withinCooldown(lastViolation.current, Date.now())) return
       lastViolation.current = Date.now()
+      useSession.getState().showPeek(pickAnchor(useSettings.getState().settings.scene), 'yell')
       useSession.getState().violation('away')
     }
 

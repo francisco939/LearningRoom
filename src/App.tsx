@@ -6,7 +6,7 @@ import { TimerRing } from '@/components/timer/TimerRing'
 import { TimerControls } from '@/components/timer/TimerControls'
 import { ModeSwitch } from '@/components/timer/ModeSwitch'
 import { PortraitFrame, type CatState } from '@/components/supervisor/PortraitFrame'
-import { PatrolPrompt } from '@/components/supervisor/PatrolPrompt'
+import { PeekCat } from '@/components/supervisor/PeekCat'
 import { CatBubble } from '@/components/supervisor/CatBubble'
 import { ViolationStamp } from '@/components/supervisor/ViolationStamp'
 import { HistoryPanel } from '@/components/panels/HistoryPanel'
@@ -38,6 +38,7 @@ export default function App() {
   const progress = useProgress((s) => s.progress)
   const timer = useSession((s) => s.timer)
   const patrol = useSession((s) => s.patrol)
+  const peek = useSession((s) => s.peek)
   const result = useSession((s) => s.result)
   const reduced = useReducedMotion()
   const now = useNow(500)
@@ -52,6 +53,18 @@ export default function App() {
     document.documentElement.dataset.motion = reduced ? 'on' : 'off'
   }, [reduced])
 
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const w = window as unknown as {
+      __lrPeek?: (tone: 'patrol' | 'yell', anchor?: 'window' | 'right' | 'left' | 'bottom') => void
+    }
+    w.__lrPeek = (tone, anchor = 'window') => {
+      const session = useSession.getState()
+      if (tone === 'patrol') session.setPatrol(Date.now() + 15_000, anchor)
+      else session.showPeek(anchor, 'yell')
+    }
+  }, [])
+
   const scene = sceneById(settings.scene)
   const remaining = remainingSec(timer, now)
   const ratio = progressRatio(timer, now)
@@ -65,7 +78,13 @@ export default function App() {
         : 'idle'
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden">
+    <div
+      className={
+        peek?.tone === 'yell'
+          ? 'stage-shake relative h-[100dvh] w-full overflow-hidden'
+          : 'relative h-[100dvh] w-full overflow-hidden'
+      }
+    >
       <SceneStage scene={scene} reducedMotion={reduced}>
         <TopBar
           onOpenHistory={() => setPanel('history')}
@@ -92,9 +111,10 @@ export default function App() {
           </div>
         </main>
 
-        <PortraitFrame image={image} state={catState} />
+        <PortraitFrame image={image} state={catState} away={Boolean(peek)} />
         <CatBubble />
-        <PatrolPrompt />
+        <PeekCat />
+        {peek?.tone === 'yell' && <div key={peek.id} className="scene-flash" aria-hidden />}
 
         <div className="absolute inset-x-0 bottom-0 z-30 flex flex-col items-center gap-3 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           <TimerControls onOpenSettings={() => setPanel('settings')} />

@@ -25,6 +25,10 @@
 
 > 首页/引导里也可以替换成自己的图：设置 → 督学形象 → 上传图片，图片只保存在本机 IndexedDB，不会进入仓库。
 
+**探头贴纸** `public/supervisor/maodie-peek.webp`（620×513，透明 WebP，51,606 bytes）：
+从同一张原图裁出头+上胸，用 `rembg`（u2net）去背景，收边后加奶油色贴纸描边，并把底部 18% 渐隐，作为巡查视频缺失时的回退。
+`rembg` 模型与依赖不随仓库分发；这一步是一次性处理，未纳入 `scripts/prepare-assets.py`（该脚本只负责肖像/图标/雨声）。
+
 ## 2. 雨声循环
 
 | 项 | 内容 |
@@ -77,13 +81,30 @@ maskable 版本把内容缩到约 70%，四周留出安全边距，背景铺满�
 `src/components/scene/*` 与 `src/components/supervisor/CatFace.tsx` 中的房间、窗景、台灯、书桌、猫脸 SVG
 均为本项目原创，随代码以 MIT 发布；它们是高清场景图缺失时的回退。
 
-`public/scenes/` 下的高清场景图由项目作者用 Seedream 生成，提示词见
-[`docs/scene-prompts.md`](docs/scene-prompts.md)。这些图片不随 MIT 代码许可发布，仅用于本项目；
-仓库默认不包含这些图片，缺失时自动使用 SVG 场景。
+`public/scenes/` 下的三张高清场景图由项目作者用 Seedream 生成，提示词见
+[`docs/scene-prompts.md`](docs/scene-prompts.md)：
+
+| 文件 | 内容 | 规格 |
+| --- | --- | --- |
+| `rainy-study.webp` | 雨夜书房 | 2560×1440，WebP，206,258 bytes |
+| `dusk-library.webp` | 黄昏图书馆 | 2560×1440，WebP，223,518 bytes |
+| `dawn-desk.webp` | 清晨书桌 | 2560×1440，WebP，184,140 bytes |
+
+三张图都裁掉了右下角「豆包 AI 生成」水印（裁掉右侧 240px、底部 133px 后统一到 16:9）。
+这些图片不随 MIT 代码许可发布，仅用于本项目；缺失时自动使用 SVG 场景。
 
 字体使用系统字体栈（苹方 / 微软雅黑 / 宋体等），未打包第三方字体。
 
-## 5. 复现
+## 5. 巡查视频（可选）
+
+`public/supervisor/peek.mp4` 与 `yell.mp4` 由项目作者用 Seedream 图生视频生成（绿幕），
+提示词见 [`docs/video-prompts.md`](docs/video-prompts.md)。
+
+- 视频为 **1:1、1080×1080、纯绿背景 `#00FF00`**，应用在 canvas 里实时抠像，不需要透明通道。
+- 仓库当前不包含视频；缺失时回退到 `maodie-peek.webp` 静态贴纸。
+- 权利归项目作者，仅用于本项目。
+
+## 6. 复现
 
 ```powershell
 # 依赖：Python + Pillow、ffmpeg（PATH 中）
@@ -100,7 +121,7 @@ python scripts/prepare-assets.py
 
 `assets-src/` 已在 `.gitignore` 中，不随仓库分发；仓库只保留 `public/` 下的成品。
 
-## 6. 未使用 / 已排除
+## 7. 未使用 / 已排除
 
 - 真实「圆头猫爹」照片、视频截图、表情包：版权归属原博主，且该梗存在虐猫争议，**不使用**。
 - 任何需要署名但未署名的第三方图片、音乐、字体。

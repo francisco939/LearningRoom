@@ -3,9 +3,10 @@ import { useSession } from '@/store/useSession'
 export function CatBubble() {
   const message = useSession((s) => s.catMessage)
   const patrol = useSession((s) => s.patrol)
+  const peek = useSession((s) => s.peek)
   const status = useSession((s) => s.timer.status)
 
-  if (!message || patrol || status === 'idle' || status === 'finished') return null
+  if (!message || patrol || peek || status === 'idle' || status === 'finished') return null
 
   return (
     <div

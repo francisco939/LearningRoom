@@ -5,10 +5,18 @@ import { createTimer, reduce } from '@/lib/timer'
 import { localRepository } from '@/lib/repository'
 import { nextCatMessage } from '@/data/catLines'
 import type { SessionDraft } from '@/lib/session'
+import type { PeekAnchor } from '@/lib/peek'
 
 export interface PatrolState {
   startedAt: number
   deadline: number
+}
+
+export interface PeekState {
+  id: number
+  anchor: PeekAnchor
+  tone: 'patrol' | 'yell'
+  at: number
 }
 
 export interface SessionResult {
@@ -19,6 +27,7 @@ export interface SessionResult {
 interface SessionStore {
   timer: TimerState
   patrol: PatrolState | null
+  peek: PeekState | null
   catMessage: CatMessage
   stamp: { id: number; kind: ViolationKind } | null
   result: SessionResult | null
@@ -30,7 +39,9 @@ interface SessionStore {
   abort: () => void
   tick: (now: number) => void
   violation: (kind: ViolationKind) => void
-  setPatrol: (deadline: number) => void
+  setPatrol: (deadline: number, anchor: PeekAnchor) => void
+  showPeek: (anchor: PeekAnchor, tone: PeekState['tone']) => void
+  dismissPeek: () => void
   ackPatrol: () => void
   clearPatrol: () => void
   say: (tone: CatMessage['tone']) => void
@@ -72,23 +83,32 @@ function restoreTimer(settings: Settings): TimerState {
 }
 
 let stampSeq = 0
+let peekSeq = 0
 
 export const useSession = create<SessionStore>((set, get) => ({
   timer: restoreTimer(readSettingsSnapshot()),
   patrol: null,
+  peek: null,
   catMessage: nextCatMessage('idle'),
   stamp: null,
   result: null,
 
   start: (settings) => {
     const timer = reduce(timerFromSettings(settings), { type: 'START', now: Date.now() })
-    set({ timer, patrol: null, result: null, stamp: null, catMessage: nextCatMessage('idle') })
+    set({
+      timer,
+      patrol: null,
+      peek: null,
+      result: null,
+      stamp: null,
+      catMessage: nextCatMessage('idle'),
+    })
     get().persist()
   },
 
   pause: () => {
     const timer = reduce(get().timer, { type: 'PAUSE', now: Date.now() })
-    set({ timer, patrol: null })
+    set({ timer, patrol: null, peek: null })
     get().persist()
   },
 
@@ -100,19 +120,19 @@ export const useSession = create<SessionStore>((set, get) => ({
 
   skip: () => {
     const timer = reduce(get().timer, { type: 'SKIP', now: Date.now() })
-    set({ timer, patrol: null })
+    set({ timer, patrol: null, peek: null })
     get().persist()
   },
 
   end: () => {
     const timer = reduce(get().timer, { type: 'END', now: Date.now() })
-    set({ timer, patrol: null })
+    set({ timer, patrol: null, peek: null })
     get().persist()
   },
 
   abort: () => {
     const timer = reduce(get().timer, { type: 'ABORT', now: Date.now() })
-    set({ timer, patrol: null })
+    set({ timer, patrol: null, peek: null })
     get().persist()
   },
 
@@ -124,6 +144,7 @@ export const useSession = create<SessionStore>((set, get) => ({
     if (prev.status === 'running' && timer.status === 'finished') {
       set({
         patrol: null,
+        peek: null,
         catMessage: nextCatMessage(timer.failureReason === 'stars' ? 'fail' : 'complete'),
       })
     }
@@ -142,16 +163,26 @@ export const useSession = create<SessionStore>((set, get) => ({
     get().persist()
   },
 
-  setPatrol: (deadline) => {
+  setPatrol: (deadline, anchor) => {
+    const now = Date.now()
+    peekSeq += 1
     set({
-      patrol: { startedAt: Date.now(), deadline },
+      patrol: { startedAt: now, deadline },
+      peek: { id: peekSeq, anchor, tone: 'patrol', at: now },
       catMessage: nextCatMessage('patrol'),
     })
   },
 
+  showPeek: (anchor, tone) => {
+    peekSeq += 1
+    set({ peek: { id: peekSeq, anchor, tone, at: Date.now() } })
+  },
+
+  dismissPeek: () => set({ peek: null }),
+
   ackPatrol: () => {
     if (!get().patrol) return
-    set({ patrol: null, catMessage: nextCatMessage('approve') })
+    set({ patrol: null, peek: null, catMessage: nextCatMessage('approve') })
   },
 
   clearPatrol: () => set({ patrol: null }),
@@ -175,6 +206,7 @@ export const useSession = create<SessionStore>((set, get) => ({
     set({
       timer: timerFromSettings(readSettingsSnapshot()),
       patrol: null,
+      peek: null,
       result: null,
     }),
 }))
