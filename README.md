@@ -19,11 +19,24 @@
 
 | 场景 | 巡查 |
 | --- | --- |
-| ![雨夜书房](docs/screenshots/hero.webp) | ![耄耋查岗](docs/screenshots/patrol.webp) |
+| ![黄昏图书馆](docs/screenshots/library.webp) | ![耄耋查岗](docs/screenshots/patrol.webp) |
 
 | 完成结算 | 成就 |
 | --- | --- |
 | ![完成](docs/screenshots/complete.webp) | ![成就](docs/screenshots/achievements.webp) |
+
+<details>
+<summary>更多截图：引导、清晨书桌、设置、历史</summary>
+
+| 引导 | 清晨书桌 |
+| --- | --- |
+| ![引导](docs/screenshots/onboarding.webp) | ![清晨](docs/screenshots/dawn.webp) |
+
+| 设置 | 历史 |
+| --- | --- |
+| ![设置](docs/screenshots/settings.webp) | ![历史](docs/screenshots/history.webp) |
+
+</details>
 
 ## 玩法与规则
 
@@ -75,11 +88,13 @@ npm run verify   # lint + test + build
 
 ## 部署
 
-仓库自带 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)：push 到 `main` 后自动跑 `npm run verify` 并发布到 GitHub Pages。
+仓库自带 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)：push 到 `main` 后自动跑 `npm run verify`，然后尝试发布到 GitHub Pages。
+
+**首次使用需手动启用一次**：仓库 **Settings → Pages → Source** 选择 **GitHub Actions**。未启用时工作流仍会完成构建（deploy 任务自动跳过），启用后重新运行即可发布。
 
 线上地址：`https://francisco939.github.io/LearningRoom/`
 
-首次使用需在仓库 **Settings → Pages → Source** 选择 **GitHub Actions**（工作流里也尝试了自动启用）。Vite 会根据 `GITHUB_ACTIONS` 自动把 `base` 设为 `/LearningRoom/`。
+Vite 会根据 `GITHUB_ACTIONS` 自动把 `base` 设为 `/LearningRoom/`。
 
 ## 目录
 
