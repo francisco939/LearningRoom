@@ -27,8 +27,9 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "assets-src"
 PUBLIC = ROOT / "public"
 
-CAT_URL = "https://live.staticflickr.com/3153/2297641934_e2b32f9b82_b.jpg"
-CAT_SRC = SRC / "cat.jpg"
+# 督学肖像由项目作者提供（豆包 AI 生成），不随仓库分发源图；
+# 需要重新生成时把原图放到 assets-src/cat-user.jpg（2048×2048）。
+CAT_SRC = SRC / "cat-user.jpg"
 CAT_OUT = PUBLIC / "supervisor" / "maodie.webp"
 
 RAIN_URL = "https://cdn.freesound.org/previews/270/270349_3366749-hq.mp3"
@@ -55,11 +56,11 @@ FFMPEG_COMMAND = (
     f"编码为 {AUDIO_BITRATE} AAC 单声道"
 )
 
-# 原图 1024×768。头部大致在 x 340–900、y 30–730；
-# 3:4 竖幅（560×700）保留耳朵留白、白嘴与一只前爪。
-CAT_CROP = (340, 30, 900, 730)
+# 原图 2048×2048，底部有字幕与水印；4:5 竖幅（1280×1600）可保留双耳、白嘴与胸口，
+# 同时正好裁掉下方「耄耋愤怒」字幕和「豆包 AI 生成」水印。
+CAT_CROP = (384, 0, 1664, 1600)
 CAT_SIZE = (720, 900)
-CAT_QUALITY = 82
+CAT_QUALITY = 88
 
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -91,18 +92,16 @@ def prepare_portrait() -> None:
 
     CAT_OUT.parent.mkdir(parents=True, exist_ok=True)
     image = Image.open(CAT_SRC).convert("RGB")
-    if image.size != (1024, 768):
-        print(f"[warn] 源图尺寸 {image.size}，脚本按 1024×768 设计，裁切框可能需要调整")
+    if image.size != (2048, 2048):
+        print(f"[warn] 源图尺寸 {image.size}，脚本按 2048×2048 设计，裁切框可能需要调整")
 
     left, top, right, bottom = CAT_CROP
     portrait = image.crop((left, top, right, bottom)).resize(CAT_SIZE, Image.LANCZOS)
 
-    # 旧照片质感：轻微降饱和、提一点对比、压一点亮度、加暖色。
-    portrait = ImageEnhance.Color(portrait).enhance(0.80)
-    portrait = ImageEnhance.Contrast(portrait).enhance(1.05)
-    portrait = ImageEnhance.Brightness(portrait).enhance(0.97)
-    warm = Image.new("RGB", portrait.size, (122, 80, 42))
-    portrait = Image.blend(portrait, warm, 0.06)
+    # 保留原图的暖色与毛绒质感，只做很轻的对比/饱和调整，避免「旧照片滤镜」感。
+    portrait = ImageEnhance.Color(portrait).enhance(1.02)
+    portrait = ImageEnhance.Contrast(portrait).enhance(1.03)
+    portrait = ImageEnhance.Brightness(portrait).enhance(0.99)
 
     portrait.save(CAT_OUT, "WEBP", quality=CAT_QUALITY, method=6)
     print(f"[out ] {CAT_OUT} {portrait.size} {CAT_OUT.stat().st_size} bytes")
@@ -387,7 +386,11 @@ def main() -> int:
     args = parser.parse_args()
 
     SRC.mkdir(parents=True, exist_ok=True)
-    download(CAT_URL, CAT_SRC, force=args.force)
+    if not CAT_SRC.exists():
+        raise SystemExit(
+            f"缺少督学源图：{CAT_SRC}\n"
+            "请把作者提供的 2048×2048 原图放到这个位置，或只重新生成雨声/图标时先手动跳过肖像。"
+        )
     download(RAIN_URL, RAIN_SRC, force=args.force)
     prepare_portrait()
     prepare_icons()

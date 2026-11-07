@@ -23,6 +23,8 @@ export interface SceneDef {
   weather: 'rain' | 'none'
   lamp: boolean
   palette: ScenePalette
+  /** 高清场景图的相对路径；文件缺失时自动回退到 SVG 房间。 */
+  photo: string
 }
 
 export const SCENES: SceneDef[] = [
@@ -33,6 +35,7 @@ export const SCENES: SceneDef[] = [
     motif: 'city',
     weather: 'rain',
     lamp: true,
+    photo: 'scenes/rainy-study.webp',
     palette: {
       wall: '#171310',
       wall2: '#241c16',
@@ -55,6 +58,7 @@ export const SCENES: SceneDef[] = [
     motif: 'library',
     weather: 'none',
     lamp: true,
+    photo: 'scenes/dusk-library.webp',
     palette: {
       wall: '#241a12',
       wall2: '#3a2a1b',
@@ -77,6 +81,7 @@ export const SCENES: SceneDef[] = [
     motif: 'garden',
     weather: 'none',
     lamp: false,
+    photo: 'scenes/dawn-desk.webp',
     palette: {
       wall: '#1b2422',
       wall2: '#2c3a35',

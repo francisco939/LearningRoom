@@ -72,6 +72,51 @@ button {
   transition: background 600ms ease;
 }
 
+.scene-fallback {
+  position: absolute;
+  inset: 0;
+}
+
+.scene-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  filter: brightness(0.96) saturate(1.02);
+  transition: opacity 900ms ease;
+}
+
+.scene-photo[data-ready='true'] {
+  opacity: 1;
+}
+
+.scene-photo-grade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 900ms ease;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 7, 5, 0.55) 0%,
+      rgba(10, 7, 5, 0.08) 20%,
+      transparent 45%,
+      rgba(10, 7, 5, 0.18) 72%,
+      rgba(10, 7, 5, 0.62) 100%
+    ),
+    radial-gradient(120% 90% at 50% 45%, transparent 42%, rgba(10, 7, 5, 0.38) 100%);
+}
+
+.scene-photo-grade[data-ready='true'] {
+  opacity: 1;
+}
+
 .scene-wall {
   position: absolute;
   inset: 0;
@@ -406,9 +451,9 @@ button {
 .portrait-img {
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
-  filter: sepia(0.18) saturate(0.86) contrast(1.06) brightness(0.92);
+  filter: saturate(0.96) contrast(1.03) brightness(0.94);
 }
 
 .portrait-plaque {

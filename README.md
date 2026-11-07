@@ -8,16 +8,18 @@
 
 ![主界面](docs/screenshots/hero.webp)
 
+> 截图使用内置 SVG 场景；把 Seedream 生成的 16:9 高清图放进 `public/scenes/`，主界面会自动切换为照片场景（无需改代码）。
+
 ## 它是什么
 
-- **场景**：雨夜书房 / 黄昏图书馆 / 清晨书桌，三套原创 SVG 房间，雨、灯光、尘埃、视差都在浏览器里实时渲染。
+- **场景**：雨夜书房 / 黄昏图书馆 / 清晨书桌。支持 **16:9 高清摄影场景**（放进 `public/scenes/` 自动启用，带淡入与压暗层），缺图时回退到原创 SVG 房间。生成提示词见 [docs/scene-prompts.md](docs/scene-prompts.md)。
 - **计时**：番茄钟 / 倒计时 / 秒表，支持自定义时长、轮数、自动开始休息。
 - **耄耋巡查**：专注中老猫会不定时查岗，15 秒内按空格或点「喵」；切走标签页超时会扣星。三颗星扣光，这一轮作废。
 - **只监督在场**：不打开摄像头，不读屏幕，只看你是否还在、是否应声。
 - **成长**：小鱼干、连续天数、5 级「猫的认可」、13 个成就、专注历史与 7 日统计。
 - **离线可用**：PWA，可安装到桌面/主屏；断网后第二次打开仍能继续。
 
-| 场景 | 巡查 |
+| 场景（SVG 回退） | 巡查 |
 | --- | --- |
 | ![黄昏图书馆](docs/screenshots/library.webp) | ![耄耋查岗](docs/screenshots/patrol.webp) |
 
@@ -112,9 +114,14 @@ src/
   data/           场景、成就、猫台词、等级
 docs/
   product.md      玩法、公式、状态机、存储
+  scene-prompts.md  Seedream 高清场景提示词
   research/       两套竞品拆解与品类研究
   screenshots/    README 截图
-public/           猫图、雨声、图标
+public/
+  scenes/         可选的高清场景图（缺图自动回退 SVG）
+  supervisor/     耄耋肖像
+  audio/          雨声循环
+  icons/          PWA 图标
 scripts/          素材处理脚本
 ```
 
@@ -145,3 +152,4 @@ scripts/          素材处理脚本
 - [Stillwhere（stillwhere.app）](docs/research/02-stillwhere.md)
 - [在线自习室品类图谱](docs/research/03-landscape.md)
 - [LearningRoom 架构建议](docs/research/04-learningroom-proposal.md)
+- [高清场景生成提示词](docs/scene-prompts.md)

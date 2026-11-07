@@ -121,11 +121,20 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                 )}
               >
                 <span
-                  className="block h-16 w-full"
+                  className="relative block h-16 w-full overflow-hidden"
                   style={{
                     background: `linear-gradient(160deg, ${scene.palette.wall} 0%, ${scene.palette.wall2} 55%, ${scene.palette.sky2} 100%)`,
                   }}
-                />
+                >
+                  <img
+                    src={`${import.meta.env.BASE_URL}${scene.photo}`}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                    onError={(event) => {
+                      event.currentTarget.style.display = 'none'
+                    }}
+                  />
+                </span>
                 <span className="block px-3 py-2">
                   <span className="block text-xs text-paper/80">{scene.name}</span>
                   <span className="mt-0.5 block text-[10px] text-paper/35">{scene.subtitle}</span>
@@ -165,7 +174,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
 
         <Section title="督学形象">
           <div className="flex items-center gap-4">
-            <div className="h-24 w-[72px] shrink-0 overflow-hidden rounded border border-paper/15 bg-black/30">
+            <div className="h-[90px] w-[72px] shrink-0 overflow-hidden rounded border border-paper/15 bg-black/30">
               {image ? (
                 <img src={image} alt="自定义督学形象" className="h-full w-full object-cover" />
               ) : (

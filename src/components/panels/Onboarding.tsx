@@ -32,7 +32,7 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
           <img
             src={`${import.meta.env.BASE_URL}supervisor/maodie.webp`}
             alt="一只上了年纪的橘猫，正眯着眼盯人"
-            className="aspect-[3/4] w-full rounded object-cover"
+            className="aspect-[4/5] w-full rounded object-cover"
           />
         </div>
       ),
