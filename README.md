@@ -14,12 +14,12 @@
 
 - **场景**：雨夜书房 / 黄昏图书馆 / 清晨书桌。支持 **16:9 高清摄影场景**（放进 `public/scenes/` 自动启用，带淡入与压暗层），缺图时回退到原创 SVG 房间。生成提示词见 [docs/scene-prompts.md](docs/scene-prompts.md)。
 - **计时**：番茄钟 / 倒计时 / 秒表，支持自定义时长、轮数、自动开始休息。
-- **耄耋突袭**：专注中老猫会不定时从**窗边或屏幕边缘**探出头来，15 秒内按空格或点「喵」；切走标签页超时，它会**张嘴哈气**、扣星，三颗星扣光这一轮作废。探头/哈气支持绿幕视频实时抠像（`public/supervisor/peek.mp4`、`yell.mp4`），没放视频时回退到静态贴纸。
+- **耄耋突袭**：专注中老猫会不定时从**窗边或屏幕边缘**探出头来，15 秒内按空格或点「喵」；切走标签页超时，它会**张嘴哈气**、扣星，三颗星扣光这一轮作废。探头/哈气来自 Seedream 视频，已切成 **15fps 帧并预抠像**成 sprite sheet（`peek-sheet.webp` / `yell-sheet.webp`），由 canvas 逐帧播放；没加载到帧时回退到静态贴纸。
 - **只监督在场**：不打开摄像头，不读屏幕，只看你是否还在、是否应声。
 - **成长**：小鱼干、连续天数、5 级「猫的认可」、13 个成就、专注历史与 7 日统计。
 - **离线可用**：PWA，可安装到桌面/主屏；断网后第二次打开仍能继续。
 
-| 场景（SVG 回退） | 巡查 |
+| 场景（Seedream 高清） | 巡查（帧动画） |
 | --- | --- |
 | ![黄昏图书馆](docs/screenshots/library.webp) | ![耄耋查岗](docs/screenshots/patrol.webp) |
 
@@ -59,13 +59,14 @@
 
 - **Vite 7 + React 19 + TypeScript**
 - **Tailwind CSS 4**（`@theme` 设计令牌）
+- **Fraunces Variable + Manrope Variable**（拉丁/数字），中文回退系统宋体/苹方
 - **Zustand**（三套 store：设置 / 进度 / 会话）
 - **vite-plugin-pwa**（离线缓存 + 安装）
 - 纯 CSS/SVG/Canvas 场景，无 3D 引擎、无动画库
 - 音频：HTMLAudioElement 雨声循环 + Web Audio 提示音
 - 测试：Vitest（73 个用例，覆盖计时、巡查、进度、存储）
 
-首屏 JS 约 **95 KB gzip**，总资源约 **1.3 MB**（含猫图、雨声、图标）。
+首屏 JS 约 **97 KB gzip**，总资源约 **2.5 MB**（含三张高清场景、猫图、帧动画、雨声与字体）。
 
 ## 本地运行
 
@@ -120,7 +121,7 @@ docs/
   screenshots/     README 截图
 public/
   scenes/         高清场景图（缺图自动回退 SVG）
-  supervisor/     耄耋肖像、探头贴纸、可选视频
+  supervisor/     耄耋肖像、探头贴纸、帧动画 sprite sheet
   audio/          雨声循环
   icons/          PWA 图标
 scripts/          素材处理脚本

@@ -116,6 +116,17 @@ export default function App() {
         <PeekCat />
         {peek?.tone === 'yell' && <div key={peek.id} className="scene-flash" aria-hidden />}
 
+        <div className="scene-label absolute bottom-7 left-7 z-20 hidden select-none sm:block">
+          <div className="flex items-center gap-2 text-[10px] tracking-[0.42em] text-paper/40">
+            <span className="h-1 w-1 rounded-full bg-amber/80" />
+            SCENE
+          </div>
+          <div className="mt-2 font-display text-[22px] tracking-[0.06em] text-paper/90">
+            {scene.name}
+          </div>
+          <div className="mt-1 text-[12px] text-paper/45">{scene.subtitle}</div>
+        </div>
+
         <div className="absolute inset-x-0 bottom-0 z-30 flex flex-col items-center gap-3 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           <TimerControls onOpenSettings={() => setPanel('settings')} />
         </div>

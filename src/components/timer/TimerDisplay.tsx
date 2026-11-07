@@ -32,7 +32,7 @@ export function TimerDisplay({ remaining, phase, mode, round, totalRounds }: Tim
 
   return (
     <div className="flex flex-col items-center select-none">
-      <div className="mb-1 flex items-center gap-2 text-[11px] tracking-[0.42em] text-paper/75 uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]">
+      <div className="mb-2 flex items-center gap-2.5 text-[13px] tracking-[0.42em] text-paper/80 uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]">
         <span>{phaseLabel(phase, mode)}</span>
         {phase === 'break' && <span className="text-amber/90">· 耄耋在打盹</span>}
       </div>
@@ -40,7 +40,7 @@ export function TimerDisplay({ remaining, phase, mode, round, totalRounds }: Tim
       <div
         className={cn(
           'timer-digits tabular font-display leading-none text-paper',
-          'text-[clamp(64px,13.5vw,164px)]',
+          'text-[clamp(72px,14vw,180px)]',
           'drop-shadow-[0_18px_40px_rgba(0,0,0,0.55)]',
         )}
         role="timer"
@@ -50,13 +50,13 @@ export function TimerDisplay({ remaining, phase, mode, round, totalRounds }: Tim
       </div>
 
       {showRounds && (
-        <div className="mt-4 flex items-center gap-1.5" aria-label={`第 ${round} 轮，共 ${totalRounds} 轮`}>
+        <div className="mt-5 flex items-center gap-2" aria-label={`第 ${round} 轮，共 ${totalRounds} 轮`}>
           {Array.from({ length: Math.min(totalRounds, 12) }).map((_, i) => (
             <span
               key={i}
               className={cn(
                 'h-1.5 rounded-full transition-all duration-500',
-                i < round - 1 ? 'w-2 bg-amber/55' : i === round - 1 ? 'w-7 bg-amber' : 'w-2 bg-paper/20',
+                i < round - 1 ? 'w-2.5 bg-amber/55' : i === round - 1 ? 'w-8 bg-amber' : 'w-2.5 bg-paper/25',
               )}
             />
           ))}

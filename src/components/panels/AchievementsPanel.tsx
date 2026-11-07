@@ -31,7 +31,7 @@ export function AchievementsPanel({ open, onClose }: AchievementsPanelProps) {
             >
               <span
                 className={cn(
-                  'mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full border',
+                  'mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-full border',
                   done ? 'border-amber/40 bg-amber/15 text-amber' : 'border-paper/15 text-paper/30',
                 )}
               >
@@ -39,14 +39,14 @@ export function AchievementsPanel({ open, onClose }: AchievementsPanelProps) {
               </span>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className={cn('text-sm', done ? 'text-paper' : 'text-paper/60')}>{item.name}</h3>
+                  <h3 className={cn('text-[15px]', done ? 'text-paper' : 'text-paper/65')}>{item.name}</h3>
                   {unlockedAt && (
-                    <span className="text-[10px] text-amber/70">
+                    <span className="text-[11px] text-amber/70">
                       {new Date(unlockedAt).toLocaleDateString('zh-CN')}
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-[11px] leading-relaxed text-paper/40">{item.description}</p>
+                <p className="mt-1.5 text-[12px] leading-relaxed text-paper/45">{item.description}</p>
               </div>
             </div>
           )

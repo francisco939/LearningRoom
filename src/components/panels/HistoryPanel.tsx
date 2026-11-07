@@ -43,8 +43,8 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
 
       <div className="mt-6 rounded-xl border border-paper/10 bg-black/15 p-4">
         <div className="flex items-baseline justify-between">
-          <h3 className="text-xs tracking-[0.2em] text-paper/50">最近七天</h3>
-          <span className="tabular text-[11px] text-paper/40">今天 {formatDuration(today)}</span>
+          <h3 className="text-[13px] tracking-[0.2em] text-paper/55">最近七天</h3>
+          <span className="tabular text-[12px] text-paper/40">今天 {formatDuration(today)}</span>
         </div>
         <div className="mt-4 flex h-28 items-end gap-2">
           {series.map((day) => (
@@ -59,7 +59,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
                   title={`${day.day} · ${formatDuration(day.sec)}`}
                 />
               </div>
-              <span className="text-[10px] text-paper/35">{day.label}</span>
+              <span className="text-[11px] text-paper/40">{day.label}</span>
             </div>
           ))}
         </div>
@@ -68,17 +68,17 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       <div className="mt-6 space-y-5">
         {groups.length === 0 && (
           <div className="rounded-xl border border-dashed border-paper/15 px-5 py-10 text-center">
-            <p className="text-sm text-paper/60">还没有专注记录</p>
-            <p className="mt-1 text-xs text-paper/35">完成、停止或中断的专注都会出现在这里。</p>
+            <p className="text-[15px] text-paper/65">还没有专注记录</p>
+            <p className="mt-1.5 text-[13px] text-paper/40">完成、停止或中断的专注都会出现在这里。</p>
           </div>
         )}
 
         {groups.map(([day, list]) => (
           <div key={day}>
             <div className="mb-2 flex items-center gap-3">
-              <h3 className="text-xs tracking-[0.2em] text-paper/50">{dayLabel(day, now)}</h3>
+              <h3 className="text-[13px] tracking-[0.2em] text-paper/55">{dayLabel(day, now)}</h3>
               <span className="h-px flex-1 bg-paper/10" />
-              <span className="tabular text-[10px] text-paper/30">
+              <span className="tabular text-[11px] text-paper/35">
                 {formatDuration(list.reduce((sum, s) => sum + s.focusedSec, 0))}
               </span>
             </div>
@@ -88,14 +88,14 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
                   key={session.id}
                   className="flex items-center gap-3 rounded-lg border border-paper/8 bg-black/15 px-3 py-2.5"
                 >
-                  <span className="tabular w-10 text-[11px] text-paper/40">
+                  <span className="tabular w-11 text-[12px] text-paper/45">
                     {new Date(session.startedAt).toLocaleTimeString('zh-CN', {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
                   </span>
-                  <span className="text-xs text-paper/75">{modeLabel(session.mode)}</span>
-                  <span className="tabular text-xs text-paper/50">{formatDuration(session.focusedSec)}</span>
+                  <span className="text-[13px] text-paper/80">{modeLabel(session.mode)}</span>
+                  <span className="tabular text-[13px] text-paper/55">{formatDuration(session.focusedSec)}</span>
                   <span className="ml-auto flex items-center gap-1">
                     {[0, 1, 2].map((i) => (
                       <span
@@ -122,8 +122,8 @@ function Summary({ icon, label, value }: { icon: React.ReactNode; label: string;
   return (
     <div className="rounded-xl border border-paper/10 bg-black/15 p-3">
       <div className="flex items-center gap-1.5 text-amber/80">{icon}</div>
-      <div className="mt-2 text-[10px] tracking-wider text-paper/40">{label}</div>
-      <div className="tabular mt-0.5 text-sm text-paper/90">{value}</div>
+      <div className="mt-2 text-[11px] tracking-wider text-paper/40">{label}</div>
+      <div className="tabular mt-1 text-[15px] text-paper/90">{value}</div>
     </div>
   )
 }
@@ -136,7 +136,7 @@ function StatusBadge({ status }: { status: Session['status'] }) {
   } as const
   const item = map[status]
   return (
-    <span className={cn('rounded-full px-2 py-0.5 text-[10px]', item.className)}>{item.label}</span>
+    <span className={cn('rounded-full px-2.5 py-1 text-[11px]', item.className)}>{item.label}</span>
   )
 }
 

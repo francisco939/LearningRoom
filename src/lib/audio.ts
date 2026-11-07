@@ -1,7 +1,9 @@
 const RAIN_SRC = `${import.meta.env.BASE_URL}audio/rain.m4a`
+const HISS_SRC = `${import.meta.env.BASE_URL}audio/hiss.m4a`
 
 class Ambience {
   private audio: HTMLAudioElement | null = null
+  private hissAudio: HTMLAudioElement | null = null
   private ctx: AudioContext | null = null
   private master: GainNode | null = null
   private volume = 0.5
@@ -53,6 +55,21 @@ class Ambience {
   }
 
   async hiss(): Promise<void> {
+    try {
+      if (!this.hissAudio) {
+        const audio = new Audio(HISS_SRC)
+        audio.preload = 'auto'
+        audio.volume = 0.9
+        this.hissAudio = audio
+      }
+      this.hissAudio.currentTime = 0
+      await this.hissAudio.play()
+    } catch {
+      await this.synthHiss()
+    }
+  }
+
+  private async synthHiss(): Promise<void> {
     try {
       const ctx = this.ensureContext()
       if (!ctx) return

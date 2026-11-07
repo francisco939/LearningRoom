@@ -1,13 +1,13 @@
 # 耄耋巡查视频提示词（Seedream / 图生视频）
 
-目标：让耄耋像 redwatch 的督学官一样「突袭」——从窗边或屏幕边缘探头，发现你没在学习时张嘴哈气。当前应用已经支持**绿幕视频实时抠像**，你只需要生成两段带纯绿背景的 MP4，放进 `public/supervisor/`，不用自己做透明通道。
+目标：让耄耋像 redwatch 的督学官一样「突袭」——从窗边或屏幕边缘探头，发现你没在学习时张嘴哈气。当前实现是把视频切成 **15fps 帧、离线抠像**后由 canvas 播放；你只需要生成两段带纯绿背景的 MP4。
 
 ## 文件与规格
 
 | 文件 | 内容 | 时长 | 规格 |
 | --- | --- | --- | --- |
-| `public/supervisor/peek.mp4` | 探头、盯人、轻微歪头 | 3–4 秒 | 1:1，1080×1080，24/30fps |
-| `public/supervisor/yell.mp4` | 突然前扑、张嘴哈气 | 2–3 秒 | 1:1，1080×1080，24/30fps |
+| `assets-src/video/peek-src.mp4` | 探头、盯人、轻微歪头 | 3–4 秒 | 1:1，1080×1080，24/30fps |
+| `assets-src/video/yell-src.mp4` | 突然前扑、张嘴哈气 | 2–3 秒 | 1:1，1080×1080，24/30fps |
 
 - **背景**：纯绿 `#00FF00`，均匀打光，猫身上不要绿色反光，背景上不要投影。
 - **构图**：只有猫的头和脖子，居中，四周留 8–10% 空白；不要身体、不要人、不要项圈。
@@ -46,25 +46,44 @@
 文字，字幕，水印，logo，签名，人，人手，身体，项圈，多只猫，卡通，插画，3D渲染，游戏画面，低分辨率，模糊，噪点，绿色溢色，绿边，纯绿衣服，镜头运动，推拉摇移，变形，脸崩，眼睛不对称，张嘴过度，血腥
 ```
 
-## 接入方式
+## 接入方式（当前实现：切帧播放）
 
-1. 生成后直接导出 MP4（H.264 即可），命名 `peek.mp4` / `yell.mp4`。
-2. 放进 `public/supervisor/`。应用会优先找 `.webm`（如果你导出了透明/VP9 版本），没有再找 `.mp4`；只有 MP4 也完全够用。
-3. 刷新页面，开始专注；巡查触发时应用会在 canvas 里实时抠掉绿色并播放，不需要转 WebM 或做透明通道。
-4. 如果 mp4 太大，压一下（保持绿幕，不要转透明）：
+本仓库不直接播放 MP4，而是把视频切成 **15fps 帧**、离线抠像、拼成 sprite sheet，再由 canvas 逐帧播放。好处是：不受浏览器编解码差异影响、可以精确停在「张嘴」那一帧、绿边可以在构建时处理干净。
+
+1. 生成视频后，放到 `assets-src/video/peek-src.mp4` / `yell-src.mp4`。
+2. 抽帧（按需调整起止时间）：
 
 ```bash
-ffmpeg -i raw-peek.mp4 -vf "scale=720:720:force_original_aspect_ratio=increase,crop=720:720" -c:v libx264 -crf 26 -pix_fmt yuv420p -an peek.mp4
+ffmpeg -y -ss 0 -t 5.5 -i assets-src/video/peek-src.mp4 -vf "fps=15,scale=280:280" assets-src/video/frames-peek/%03d.png
+ffmpeg -y -ss 1.0 -t 4.8 -i assets-src/video/yell-src.mp4 -vf "fps=15,scale=280:280" assets-src/video/frames-yell/%03d.png
 ```
 
-5. 如果自动播放失败或文件缺失，会回退到当前的静态贴纸（`maodie-peek.webp`），不会白屏。
+3. 抠像 + 拼图：
+
+```powershell
+$env:PYTHONPATH = "D:\code\LearningRoom\.pydeps"
+python scripts/prepare-video-frames.py
+```
+
+输出：
+
+```
+public/supervisor/peek-sheet.webp + peek.json
+public/supervisor/yell-sheet.webp + yell.json
+```
+
+4. 页面读取 JSON（fps / 帧数 / 网格），canvas 按 15fps 播放；`yell` 的最后一帧停在张嘴状态，2.6 秒后收回。
+5. 脚本顶部可以调 `CELL`（单帧尺寸）、`COLS`（每行帧数）、`FPS`；帧数越多越顺，体积也越大。
+6. 帧没加载到时会回退到静态贴纸 `maodie-peek.webp`，不会白屏。
 
 ## 抠像参数
 
-应用使用 `src/components/supervisor/PeekVisual.tsx` 里的 `keyGreen()`：
+`scripts/prepare-video-frames.py` 的处理：
 
-- 绿色主导（`g - max(r,b) > 34` 且 `g > 70`）→ 完全透明；
-- 边缘过渡区 → 半透明并压掉绿色通道，减少绿边；
-- 背景越纯、越均匀，边缘越干净。拍摄/生成时让猫离绿幕远一点，避免绿色反光。
+- 先把右下角「豆包 AI 生成」水印区域替换成背景绿，再参与抠像；
+- 用 HSV 的绿色范围（H 82–155、S≥50、V≥35）生成候选，再只保留**与画面边缘连通**的绿色区域，避免把猫眼睛里的绿色也抠掉；
+- alpha 做 1px 收边 + 0.55px 羽化；
+- 绿溢色抑制：`g = min(g, (r+b)/2 + 10)`；
+- 底部 22% 由 CSS mask 渐隐，避免身体直切。
 
-如果生成出来的绿不够纯（比如偏青），把背景色统一到 `#00FF00`，或把阈值 `34` 调低/调高。
+背景越纯、越均匀，边缘越干净。生成时让猫离绿幕远一点，避免绿色反光。

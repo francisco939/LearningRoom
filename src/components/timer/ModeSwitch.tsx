@@ -26,14 +26,14 @@ export function ModeSwitch() {
           aria-selected={mode === item.id}
           onClick={() => update({ mode: item.id })}
           className={cn(
-            'rounded-full px-4 py-1.5 text-xs tracking-wide transition',
+            'rounded-full px-4 py-2 text-[13px] tracking-wide transition',
             mode === item.id
               ? 'bg-paper text-ink shadow-sm'
               : 'text-paper/55 hover:bg-paper/10 hover:text-paper',
           )}
         >
           {item.label}
-          <span className={cn('ml-1.5 text-[10px]', mode === item.id ? 'text-ink/45' : 'text-paper/30')}>
+          <span className={cn('ml-1.5 text-[11px]', mode === item.id ? 'text-ink/45' : 'text-paper/35')}>
             {item.hint}
           </span>
         </button>

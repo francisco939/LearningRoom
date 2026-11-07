@@ -56,6 +56,19 @@ ffmpeg -y -i "assets-src/rain_comp.wav" -af "$FILTER2" -ac 1 -ar 44100 -c:a aac 
 
 > 上面的 `measured_*` 是本次源文件的值；换源后需要重新测量。`scripts/prepare-assets.py` 会自动完成这两步。
 
+### 2.1 哈气声
+
+| 项 | 内容 |
+| --- | --- |
+| 用途 | 耄耋张嘴哈气时的音效 |
+| 作者 | Zabuhailo |
+| 原始页面 | https://commons.wikimedia.org/wiki/File:Cat_hissing_-_Zabuhailo.wav |
+| 许可 | **CC0 1.0** |
+| 源文件 | `assets-src/audio/cat-hiss.wav`（2.3 秒真实猫哈气） |
+| 产物 | `public/audio/hiss.m4a`（1.4 秒，AAC-LC，单声道，15,672 bytes） |
+
+处理：截取 0.2–1.6 秒，loudnorm 到 -18 LUFS，首尾淡入淡出。`Ambience.hiss()` 优先播放它，失败时才用 Web Audio 合成噪声兜底。
+
 - 雨声原始动态很大（峰值 -0.4 dB、均值 -26 dB）。直接 single-pass `loudnorm` 时，为了守住
   -1.5 dBTP 会把整体压到 -20 LUFS 左右；因此先压缩/限幅降低波峰因数，再用两遍 `loudnorm`
   （第二遍 `linear=true`）精确落到 -16 LUFS。
@@ -93,15 +106,24 @@ maskable 版本把内容缩到约 70%，四周留出安全边距，背景铺满�
 三张图都裁掉了右下角「豆包 AI 生成」水印（裁掉右侧 240px、底部 133px 后统一到 16:9）。
 这些图片不随 MIT 代码许可发布，仅用于本项目；缺失时自动使用 SVG 场景。
 
-字体使用系统字体栈（苹方 / 微软雅黑 / 宋体等），未打包第三方字体。
+界面字体使用 **Fraunces Variable**（拉丁/数字）与 **Manrope Variable**（UI 拉丁），通过 `@fontsource-variable` 打包，许可均为 **SIL OFL 1.1**；中文回退到系统宋体/苹方。
 
-## 5. 巡查视频（可选）
+## 5. 巡查帧动画
 
-`public/supervisor/peek.mp4` 与 `yell.mp4` 由项目作者用 Seedream 图生视频生成（绿幕），
-提示词见 [`docs/video-prompts.md`](docs/video-prompts.md)。
+`peek-src.mp4` / `yell-src.mp4` 由项目作者用 Seedream 图生视频生成（720×720，10 秒，绿幕），
+提示词见 [`docs/video-prompts.md`](docs/video-prompts.md)。仓库不直接播放 MP4，而是切成帧并预抠像：
 
-- 视频为 **1:1、1080×1080、纯绿背景 `#00FF00`**，应用在 canvas 里实时抠像，不需要透明通道。
-- 仓库当前不包含视频；缺失时回退到 `maodie-peek.webp` 静态贴纸。
+| 文件 | 内容 | 规格 |
+| --- | --- | --- |
+| `peek-sheet.webp` + `peek.json` | 探头：83 帧 | 15fps，单帧 280×280，2800×2520，412,994 bytes |
+| `yell-sheet.webp` + `yell.json` | 哈气：73 帧 | 15fps，单帧 280×280，2800×2240，556,748 bytes |
+
+处理脚本：[`scripts/prepare-video-frames.py`](scripts/prepare-video-frames.py)：抽帧 → HSV 绿色连通域抠像 → 收边/羽化/去绿溢 → 拼 sprite sheet。
+源视频与中间帧在 `assets-src/video/`，已被 `.gitignore` 忽略；仓库只保留成品。
+
+- 眼睛等内部绿色不会被误抠，因为只保留与画面边缘连通的绿色区域。
+- 右下角「豆包 AI 生成」水印在抠像前先替换成背景绿并清掉 alpha。
+- 帧没加载到时回退到 `maodie-peek.webp` 静态贴纸。
 - 权利归项目作者，仅用于本项目。
 
 ## 6. 复现
@@ -113,13 +135,25 @@ python scripts/prepare-assets.py
 
 脚本会：
 
-1. 下载猫图与雨声到 `assets-src/`（已存在则跳过，`--force` 强制重下）。
-2. 裁切、调色、压缩肖像。
+1. 读取 `assets-src/cat-user.jpg`（作者提供的原图），裁切/调色/压缩肖像。
+2. 下载雨声、做两遍 loudnorm、生成 40 秒循环。
 3. 用 Pillow 重绘三个图标。
-4. 调用 ffmpeg 生成 40 秒雨声循环。
-5. 打印所有产物的尺寸与字节数。
+4. 打印所有产物的尺寸与字节数。
 
-`assets-src/` 已在 `.gitignore` 中，不随仓库分发；仓库只保留 `public/` 下的成品。
+巡查帧需要额外两步（源视频放 `assets-src/video/`）：
+
+```bash
+# 抽帧（时间范围见 docs/video-prompts.md）
+ffmpeg -y -ss 0 -t 5.5 -i assets-src/video/peek-src.mp4 -vf "fps=15,scale=280:280" assets-src/video/frames-peek/%03d.png
+ffmpeg -y -ss 1.0 -t 4.8 -i assets-src/video/yell-src.mp4 -vf "fps=15,scale=280:280" assets-src/video/frames-yell/%03d.png
+```
+
+```powershell
+$env:PYTHONPATH = "D:\code\LearningRoom\.pydeps"
+python scripts/prepare-video-frames.py
+```
+
+`assets-src/`、`.pydeps/`、`.models/` 已在 `.gitignore` 中，不随仓库分发；仓库只保留 `public/` 下的成品。
 
 ## 7. 未使用 / 已排除
 

@@ -83,7 +83,7 @@ export function TimerControls({ onOpenSettings }: TimerControlsProps) {
             label={running ? '暂停' : paused ? '继续' : '开始专注'}
             onClick={primary}
           >
-            {running ? <Pause size={22} fill="currentColor" /> : <Play size={22} fill="currentColor" />}
+            {running ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
           </PrimaryButton>
         )}
 
@@ -96,11 +96,11 @@ export function TimerControls({ onOpenSettings }: TimerControlsProps) {
         <span className="mx-1 h-6 w-px bg-paper/10" />
 
         <IconButton label="设置" onClick={onOpenSettings}>
-          <span className="text-[11px] tracking-widest">设置</span>
+          <span className="text-[12px] tracking-widest">设置</span>
         </IconButton>
       </div>
 
-      <p className="text-[11px] text-paper/35">
+      <p className="text-[13px] text-paper/40">
         {patrol
           ? '耄耋在看你 —— 按空格或点「喵」'
           : running
@@ -129,9 +129,9 @@ function PrimaryButton({
       aria-label={label}
       title={label}
       className={cn(
-        'mx-2 grid h-14 w-14 place-items-center rounded-full text-ink',
+        'mx-2 grid h-16 w-16 place-items-center rounded-full text-ink',
         'bg-gradient-to-b from-amber to-amber-deep',
-        'shadow-[0_10px_28px_rgba(227,164,92,0.28),inset_0_1px_0_rgba(255,255,255,0.4)]',
+        'shadow-[0_14px_36px_rgba(227,164,92,0.32),inset_0_1px_0_rgba(255,255,255,0.45)]',
         'transition hover:brightness-110 active:scale-95',
       )}
     >
@@ -155,7 +155,7 @@ function IconButton({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="grid h-9 min-w-9 place-items-center rounded-full px-2 text-paper/70 transition hover:bg-paper/10 hover:text-paper active:scale-95"
+      className="grid h-10 min-w-10 place-items-center rounded-full px-2.5 text-paper/70 transition hover:bg-paper/10 hover:text-paper active:scale-95"
     >
       {children}
     </button>

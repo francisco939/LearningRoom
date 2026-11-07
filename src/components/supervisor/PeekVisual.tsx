@@ -2,22 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import type { PeekState } from '@/store/useSession'
 import { cn } from '@/lib/cn'
 
-const CANVAS = 480
-
-function keyGreen(data: Uint8ClampedArray): void {
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i]
-    const g = data[i + 1]
-    const b = data[i + 2]
-    const dominance = g - Math.max(r, b)
-    if (g > 70 && dominance > 34) {
-      data[i + 3] = 0
-    } else if (dominance > 16) {
-      const alpha = Math.max(0, Math.min(255, (1 - (dominance - 16) / 18) * 255))
-      data[i + 3] = Math.min(data[i + 3], alpha)
-      data[i + 1] = Math.round((r + b) / 2)
-    }
-  }
+interface SheetManifest {
+  fps: number
+  cell: number
+  cols: number
+  rows: number
+  count: number
 }
 
 interface PeekVisualProps {
@@ -38,17 +28,14 @@ export function PeekVisual({ tone }: PeekVisualProps) {
         />
         {tone === 'yell' && <YellMouth />}
       </div>
-      <KeyedVideo key={tone} tone={tone} onReady={() => setReady(true)} />
+      <FramePlayer key={tone} tone={tone} onReady={() => setReady(true)} />
     </div>
   )
 }
 
-function KeyedVideo({ tone, onReady }: { tone: PeekState['tone']; onReady: () => void }) {
-  const videoRef = useRef<HTMLVideoElement>(null)
+function FramePlayer({ tone, onReady }: { tone: PeekState['tone']; onReady: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const onReadyRef = useRef(onReady)
-  const readyRef = useRef(false)
-  const [src, setSrc] = useState<string | null>(null)
 
   useEffect(() => {
     onReadyRef.current = onReady
@@ -57,94 +44,69 @@ function KeyedVideo({ tone, onReady }: { tone: PeekState['tone']; onReady: () =>
   useEffect(() => {
     const asset = tone === 'yell' ? 'yell' : 'peek'
     const base = `${import.meta.env.BASE_URL}supervisor/${asset}`
-    let alive = true
+    let cancelled = false
+    let raf = 0
 
-    const pick = async () => {
-      for (const ext of ['webm', 'mp4']) {
-        try {
-          const response = await fetch(`${base}.${ext}`, { method: 'HEAD' })
-          const type = response.headers.get('content-type') ?? ''
-          if (response.ok && type.startsWith('video/')) {
-            if (alive) setSrc(`${base}.${ext}`)
-            return
-          }
-        } catch {
-          /* try next */
-        }
+    const start = async () => {
+      const response = await fetch(`${base}.json`, { cache: 'no-cache' })
+      if (!response.ok) throw new Error('manifest missing')
+      const manifest = (await response.json()) as SheetManifest
+
+      const image = new Image()
+      image.src = `${base}-sheet.webp`
+      await image.decode()
+      if (cancelled) return
+
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      const { fps, cell, cols, count } = manifest
+      canvas.width = cell
+      canvas.height = cell
+
+      let frame = 0
+      let last = performance.now()
+      let acc = 0
+
+      const draw = () => {
+        const col = frame % cols
+        const row = Math.floor(frame / cols)
+        ctx.clearRect(0, 0, cell, cell)
+        ctx.drawImage(image, col * cell, row * cell, cell, cell, 0, 0, cell, cell)
       }
+
+      draw()
+      onReadyRef.current()
+
+      const loop = (now: number) => {
+        acc += now - last
+        last = now
+        const step = 1000 / fps
+        let advanced = false
+        while (acc >= step && frame < count - 1) {
+          frame += 1
+          acc -= step
+          advanced = true
+        }
+        if (advanced) draw()
+        if (frame < count - 1) raf = requestAnimationFrame(loop)
+      }
+      raf = requestAnimationFrame(loop)
     }
-    void pick()
+
+    void start().catch(() => {
+      /* 静态贴纸回退 */
+    })
+
     return () => {
-      alive = false
+      cancelled = true
+      cancelAnimationFrame(raf)
     }
   }, [tone])
 
-  useEffect(() => {
-    if (!src) return
-    const video = videoRef.current
-    const canvas = canvasRef.current
-    if (!video || !canvas) return
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    if (!ctx) return
-
-    let raf = 0
-    let stopped = false
-
-    const draw = () => {
-      if (stopped) return
-      if (video.readyState >= 2 && video.videoWidth > 0) {
-        ctx.drawImage(video, 0, 0, CANVAS, CANVAS)
-        const frame = ctx.getImageData(0, 0, CANVAS, CANVAS)
-        keyGreen(frame.data)
-        ctx.putImageData(frame, 0, 0)
-        if (!readyRef.current) {
-          readyRef.current = true
-          onReadyRef.current()
-        }
-      }
-      raf = requestAnimationFrame(draw)
-    }
-
-    const start = async () => {
-      try {
-        await video.play()
-        draw()
-      } catch {
-        /* 自动播放失败时保留静态回退 */
-      }
-    }
-    void start()
-
-    const onEnded = () => {
-      stopped = true
-      cancelAnimationFrame(raf)
-    }
-    video.addEventListener('ended', onEnded)
-
-    return () => {
-      stopped = true
-      cancelAnimationFrame(raf)
-      video.removeEventListener('ended', onEnded)
-      video.pause()
-    }
-  }, [src])
-
-  return (
-    <>
-      {src && (
-        <video
-          ref={videoRef}
-          className="peek-video-source"
-          src={src}
-          muted
-          playsInline
-          preload="auto"
-          aria-hidden
-        />
-      )}
-      <canvas ref={canvasRef} width={CANVAS} height={CANVAS} className="peek-video" aria-hidden />
-    </>
-  )
+  return <canvas ref={canvasRef} className="peek-video" aria-hidden />
 }
 
 function YellMouth() {

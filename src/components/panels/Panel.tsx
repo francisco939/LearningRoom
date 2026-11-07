@@ -47,15 +47,15 @@ export function Panel({ open, title, subtitle, onClose, children, wide = false }
       >
         <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-paper/10 bg-[#171210]/95 px-6 py-5 backdrop-blur">
           <div>
-            <h2 className="font-display text-xl tracking-[0.12em] text-paper">{title}</h2>
-            {subtitle && <p className="mt-1 text-xs text-paper/45">{subtitle}</p>}
+            <h2 className="font-display text-2xl tracking-[0.12em] text-paper">{title}</h2>
+            {subtitle && <p className="mt-1.5 text-[13px] text-paper/50">{subtitle}</p>}
           </div>
           <button
             ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="关闭面板"
-            className="grid h-9 w-9 place-items-center rounded-full border border-paper/10 text-paper/60 transition hover:bg-paper/10 hover:text-paper"
+            className="grid h-10 w-10 place-items-center rounded-full border border-paper/10 text-paper/60 transition hover:bg-paper/10 hover:text-paper"
           >
             <X size={17} />
           </button>

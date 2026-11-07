@@ -50,14 +50,14 @@ export function PeekCat() {
         ) : (
           patrol && (
             <div className="cat-bubble peek-bubble">
-              <div className="text-[10px] tracking-[0.24em] text-[#8a6a45]">耄耋 · 查岗</div>
-              <p className="mt-1 text-[14px] leading-snug text-[#241b12]">{message.text}</p>
+              <div className="text-[11px] tracking-[0.24em] text-[#8a6a45]">耄耋 · 查岗</div>
+              <p className="mt-1 text-[15px] leading-snug text-[#241b12]">{message.text}</p>
               <div className="mt-2.5 flex items-center justify-between">
-                <span className="tabular text-[11px] text-[#8a6a45]">还有 {seconds} 秒</span>
+                <span className="tabular text-[12px] text-[#8a6a45]">还有 {seconds} 秒</span>
                 <button
                   type="button"
                   onClick={ack}
-                  className="patrol-ack relative grid h-10 w-10 place-items-center rounded-full bg-[#2a211a] text-[13px] font-medium shadow-lg transition hover:scale-105 active:scale-95"
+                  className="patrol-ack relative grid h-10 w-10 place-items-center rounded-full bg-[#2a211a] text-[14px] font-medium shadow-lg transition hover:scale-105 active:scale-95"
                   style={{ color: '#f4e8d2' }}
                   aria-label="我在，回应耄耋"
                 >

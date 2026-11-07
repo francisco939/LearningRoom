@@ -45,7 +45,8 @@
 - **离座**：`visibilitychange` 记录隐藏时长，回来时超过宽限 → 扣 1 星。
 - **查岗**：气泡出现，倒计时环走完未回应 → 扣 1 星。
 - **哈气**：超时或离座时播放张嘴哈气动画 + 屏幕震动 + 记过印章；应用会合成一声哈气。
-- **视频**：`public/supervisor/peek.mp4` / `yell.mp4` 为绿幕素材，`PeekVisual` 用 canvas 逐帧抠掉 `#00FF00`；缺文件时回退到 `maodie-peek.webp` 贴纸。
+- **帧动画**：`peek-sheet.webp` / `yell-sheet.webp` 是 15fps 预抠像 sprite sheet，`PeekVisual` 按 JSON 里的 fps/网格逐帧绘制；yell 最后一帧保持张嘴。帧缺失时回退到 `maodie-peek.webp` 贴纸。
+- **音效**：`public/audio/hiss.m4a` 是 CC0 真实猫哈气声，在 yell 时播放；播放失败时用 Web Audio 合成噪声兜底。
 - **无操作**：只提前触发查岗，不直接扣星（读书时可能没有键鼠输入）。
 - **冷却**：同一类违规 30 秒内不重复扣星。
 - **暂停/休息**：不巡查；页面隐藏时错过的巡查会在 5 秒后重试，不会永久丢失。

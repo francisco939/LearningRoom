@@ -58,8 +58,8 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
               className="flex items-center justify-between rounded-xl border border-paper/10 bg-black/20 px-4 py-3 text-left transition hover:border-amber/35 hover:bg-amber/[0.05]"
             >
               <span>
-                <span className="block text-sm text-paper/85">{preset.label}</span>
-                <span className="text-[11px] text-paper/35">{preset.hint}</span>
+                <span className="block text-[15px] text-paper/85">{preset.label}</span>
+                <span className="text-[12px] text-paper/40">{preset.hint}</span>
               </span>
               <ArrowRight size={15} className="text-paper/30" />
             </button>
@@ -73,7 +73,7 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
       title: '它只看你在不在',
       body: '耄耋不打开摄像头，也不读你的屏幕。它只在意两件事：你有没有突然消失，以及它叫你的时候你有没有应声。',
       extra: (
-        <ul className="mt-5 space-y-2 text-left text-xs text-paper/55">
+        <ul className="mt-5 space-y-2 text-left text-[13px] text-paper/60">
           {[
             '切走标签页超时，扣一颗星',
             '巡查时 15 秒内按空格或点「喵」',
@@ -96,12 +96,12 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
       <div className="w-full max-w-md rounded-2xl border border-paper/12 bg-[#1a1410]/95 p-6 shadow-[0_40px_120px_rgba(0,0,0,0.7)] sm:p-8">
         <div className="flex items-center gap-2 text-amber/80">
           {current.icon}
-          <span className="text-[10px] tracking-[0.32em]">{current.eyebrow}</span>
+          <span className="text-[11px] tracking-[0.32em]">{current.eyebrow}</span>
         </div>
-        <h2 className="mt-4 font-display text-2xl tracking-wide text-paper sm:text-[28px]">
+        <h2 className="mt-4 font-display text-3xl tracking-wide text-paper sm:text-[34px]">
           {current.title}
         </h2>
-        <p className="mt-3 text-sm leading-relaxed text-paper/60">{current.body}</p>
+        <p className="mt-3 text-[15px] leading-relaxed text-paper/65">{current.body}</p>
         {current.extra}
 
         <div className="mt-7 flex items-center justify-between">
@@ -121,7 +121,7 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="rounded-full px-3 py-2 text-xs text-paper/45 transition hover:text-paper"
+                className="rounded-full px-3 py-2 text-[13px] text-paper/50 transition hover:text-paper"
               >
                 返回
               </button>
@@ -129,7 +129,7 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
             <button
               type="button"
               onClick={() => (step === steps.length - 1 ? finish() : setStep(step + 1))}
-              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-amber to-amber-deep px-5 py-2.5 text-xs font-medium text-ink transition hover:brightness-110"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-amber to-amber-deep px-5 py-2.5 text-[13px] font-medium text-ink transition hover:brightness-110"
             >
               {step === steps.length - 1 ? '开始自习' : '下一步'}
               <ArrowRight size={14} />
@@ -141,7 +141,7 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
           <button
             type="button"
             onClick={finish}
-            className="mt-4 w-full text-center text-[10px] tracking-widest text-paper/25 transition hover:text-paper/50"
+            className="mt-4 w-full text-center text-[11px] tracking-widest text-paper/30 transition hover:text-paper/50"
           >
             跳过
           </button>

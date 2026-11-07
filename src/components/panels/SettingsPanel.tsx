@@ -69,7 +69,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
             checked={settings.autoStartFocus}
             onChange={(checked) => update({ autoStartFocus: checked })}
           />
-          <p className="text-[11px] leading-relaxed text-paper/35">
+          <p className="text-[12px] leading-relaxed text-paper/35">
             修改时长只影响下一场；正在进行的计时不会被打断。
           </p>
         </Section>
@@ -89,8 +89,8 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                 )}
               >
                 <span>
-                  <span className="block text-sm text-paper/85">{item.name}</span>
-                  <span className="mt-0.5 block text-[11px] text-paper/40">{item.desc}</span>
+                  <span className="block text-[15px] text-paper/85">{item.name}</span>
+                  <span className="mt-0.5 block text-[12px] text-paper/40">{item.desc}</span>
                 </span>
                 <span
                   className={cn(
@@ -101,7 +101,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
               </button>
             ))}
           </div>
-          <p className="text-[11px] leading-relaxed text-paper/35">
+          <p className="text-[12px] leading-relaxed text-paper/35">
             耄耋只看你是否在场：切走标签页、查岗不应声会扣星；它不打开摄像头。
           </p>
         </Section>
@@ -136,8 +136,8 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                   />
                 </span>
                 <span className="block px-3 py-2">
-                  <span className="block text-xs text-paper/80">{scene.name}</span>
-                  <span className="mt-0.5 block text-[10px] text-paper/35">{scene.subtitle}</span>
+                  <span className="block text-[13px] text-paper/80">{scene.name}</span>
+                  <span className="mt-0.5 block text-[12px] text-paper/35">{scene.subtitle}</span>
                 </span>
               </button>
             ))}
@@ -154,7 +154,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
               else ambience.stop()
             }}
           />
-          <label className="flex items-center gap-3 text-xs text-paper/55">
+          <label className="flex items-center gap-3 text-[13px] text-paper/55">
             音量
             <input
               type="range"
@@ -186,14 +186,14 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
               )}
             </div>
             <div className="flex-1">
-              <p className="text-[11px] leading-relaxed text-paper/40">
+              <p className="text-[12px] leading-relaxed text-paper/40">
                 默认是公有领域的 22 岁橘猫肖像。你也可以换成自己的图，只保存在本机。
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-paper/15 px-3 py-1.5 text-[11px] text-paper/70 transition hover:bg-paper/10"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-paper/15 px-3 py-1.5 text-[12px] text-paper/70 transition hover:bg-paper/10"
                 >
                   <Upload size={13} /> 上传图片
                 </button>
@@ -201,13 +201,13 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                   <button
                     type="button"
                     onClick={() => void remove()}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-paper/15 px-3 py-1.5 text-[11px] text-paper/55 transition hover:bg-paper/10"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-paper/15 px-3 py-1.5 text-[12px] text-paper/55 transition hover:bg-paper/10"
                   >
                     <Trash2 size={13} /> 恢复默认
                   </button>
                 )}
               </div>
-              {error && <p className="mt-2 text-[11px] text-danger">{error}</p>}
+              {error && <p className="mt-2 text-[12px] text-danger">{error}</p>}
               <input
                 ref={fileRef}
                 type="file"
@@ -237,7 +237,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                 type="button"
                 onClick={() => update({ reducedMotion: value })}
                 className={cn(
-                  'rounded-full border px-3 py-1.5 text-[11px] transition',
+                  'rounded-full border px-3 py-1.5 text-[12px] transition',
                   settings.reducedMotion === value
                     ? 'border-amber/40 bg-amber/10 text-amber'
                     : 'border-paper/10 text-paper/45 hover:bg-paper/10',
@@ -250,7 +250,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
         </Section>
 
         <Section title="数据">
-          <p className="text-[11px] leading-relaxed text-paper/40">
+          <p className="text-[12px] leading-relaxed text-paper/40">
             记录、成就、鱼干与设置都存在浏览器本地。清理浏览器数据会一并丢失。
           </p>
           {confirmReset ? (
@@ -271,14 +271,14 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                     void remove()
                     onClose()
                   }}
-                  className="rounded-full bg-danger/85 px-3 py-1.5 text-[11px] text-paper transition hover:bg-danger"
+                  className="rounded-full bg-danger/85 px-3 py-1.5 text-[12px] text-paper transition hover:bg-danger"
                 >
                   确认清空
                 </button>
                 <button
                   type="button"
                   onClick={() => setConfirmReset(false)}
-                  className="rounded-full border border-paper/15 px-3 py-1.5 text-[11px] text-paper/60"
+                  className="rounded-full border border-paper/15 px-3 py-1.5 text-[12px] text-paper/60"
                 >
                   取消
                 </button>
@@ -288,7 +288,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
             <button
               type="button"
               onClick={() => setConfirmReset(true)}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-paper/15 px-3 py-1.5 text-[11px] text-paper/60 transition hover:border-danger/40 hover:text-danger"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-paper/15 px-3 py-1.5 text-[12px] text-paper/60 transition hover:border-danger/40 hover:text-danger"
             >
               <RotateCcw size={13} /> 清空所有数据
             </button>
@@ -302,7 +302,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h3 className="mb-3 text-[11px] tracking-[0.28em] text-paper/40">{title}</h3>
+      <h3 className="mb-3 text-[12px] tracking-[0.28em] text-paper/40">{title}</h3>
       <div className="space-y-3">{children}</div>
     </section>
   )
@@ -323,7 +323,7 @@ function NumberField({
 }) {
   return (
     <label className="block rounded-xl border border-paper/10 bg-black/15 px-3 py-2">
-      <span className="block text-[10px] text-paper/35">{label}</span>
+      <span className="block text-[12px] text-paper/35">{label}</span>
       <input
         type="number"
         min={min}
@@ -333,7 +333,7 @@ function NumberField({
           const next = Number(event.target.value)
           if (Number.isFinite(next) && next >= min && next <= max) onChange(Math.round(next))
         }}
-        className="tabular mt-1 w-full bg-transparent text-sm text-paper/90 outline-none"
+        className="tabular mt-1 w-full bg-transparent text-[15px] text-paper/90 outline-none"
       />
     </label>
   )
@@ -356,7 +356,7 @@ function Toggle({
       onClick={() => onChange(!checked)}
       className="flex w-full items-center justify-between rounded-xl border border-paper/8 bg-black/15 px-3.5 py-2.5 text-left"
     >
-      <span className="text-xs text-paper/70">{label}</span>
+      <span className="text-[13px] text-paper/70">{label}</span>
       <span
         className={cn(
           'relative h-5 w-9 rounded-full transition',
