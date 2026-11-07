@@ -563,7 +563,8 @@ button {
   top: 23%;
 }
 
-.peek-right .peek-img {
+.peek-right .peek-img,
+.peek-right .peek-video {
   transform: scaleX(-1);
 }
 

@@ -48,13 +48,39 @@ function KeyedVideo({ tone, onReady }: { tone: PeekState['tone']; onReady: () =>
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const onReadyRef = useRef(onReady)
   const readyRef = useRef(false)
-  const asset = tone === 'yell' ? 'yell' : 'peek'
+  const [src, setSrc] = useState<string | null>(null)
 
   useEffect(() => {
     onReadyRef.current = onReady
   }, [onReady])
 
   useEffect(() => {
+    const asset = tone === 'yell' ? 'yell' : 'peek'
+    const base = `${import.meta.env.BASE_URL}supervisor/${asset}`
+    let alive = true
+
+    const pick = async () => {
+      for (const ext of ['webm', 'mp4']) {
+        try {
+          const response = await fetch(`${base}.${ext}`, { method: 'HEAD' })
+          const type = response.headers.get('content-type') ?? ''
+          if (response.ok && type.startsWith('video/')) {
+            if (alive) setSrc(`${base}.${ext}`)
+            return
+          }
+        } catch {
+          /* try next */
+        }
+      }
+    }
+    void pick()
+    return () => {
+      alive = false
+    }
+  }, [tone])
+
+  useEffect(() => {
+    if (!src) return
     const video = videoRef.current
     const canvas = canvasRef.current
     if (!video || !canvas) return
@@ -101,21 +127,21 @@ function KeyedVideo({ tone, onReady }: { tone: PeekState['tone']; onReady: () =>
       video.removeEventListener('ended', onEnded)
       video.pause()
     }
-  }, [])
+  }, [src])
 
   return (
     <>
-      <video
-        ref={videoRef}
-        className="peek-video-source"
-        muted
-        playsInline
-        preload="auto"
-        aria-hidden
-      >
-        <source src={`${import.meta.env.BASE_URL}supervisor/${asset}.webm`} type="video/webm" />
-        <source src={`${import.meta.env.BASE_URL}supervisor/${asset}.mp4`} type="video/mp4" />
-      </video>
+      {src && (
+        <video
+          ref={videoRef}
+          className="peek-video-source"
+          src={src}
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden
+        />
+      )}
       <canvas ref={canvasRef} width={CANVAS} height={CANVAS} className="peek-video" aria-hidden />
     </>
   )
