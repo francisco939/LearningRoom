@@ -1,0 +1,61 @@
+import { fileURLToPath, URL } from 'node:url'
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
+
+export default defineConfig({
+  base: process.env.GITHUB_ACTIONS ? '/LearningRoom/' : '/',
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['icons/*.png', 'supervisor/maodie.webp', 'audio/rain.m4a'],
+      manifest: {
+        name: 'LearningRoom · 耄耋自习室',
+        short_name: '耄耋自习室',
+        description: '一只退休的监学猫，陪你把这一轮坐完。',
+        lang: 'zh-CN',
+        theme_color: '#14100d',
+        background_color: '#14100d',
+        display: 'standalone',
+        orientation: 'any',
+        start_url: '.',
+        scope: '.',
+        icons: [
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          {
+            src: 'icons/maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,m4a}'],
+        cleanupOutdatedCaches: true,
+        navigateFallback: 'index.html',
+      },
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
+  server: {
+    watch: {
+      // 编辑器原子写入会在源码目录留下临时目录，Vite 的 watcher 不应跟踪它们。
+      ignored: ['**/*.tmpdir/**', '**/*.tmp', '**/.DS_Store'],
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test/setup.ts',
+    css: false,
+  },
+})

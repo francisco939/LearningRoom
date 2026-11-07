@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.npm-cache/
+*.local
+.DS_Store
+Thumbs.db
+.probe
+assets-src/
+playwright-report/
