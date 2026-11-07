@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useSession } from '@/store/useSession'
+import { useSettings } from '@/store/useSettings'
 import { useNow } from '@/hooks/useNow'
 import { ambience } from '@/lib/audio'
 import { cn } from '@/lib/cn'
@@ -11,11 +12,12 @@ export function PeekCat() {
   const message = useSession((s) => s.catMessage)
   const ack = useSession((s) => s.ackPatrol)
   const dismiss = useSession((s) => s.dismissPeek)
+  const sound = useSettings((s) => s.settings.sound)
   const now = useNow(patrol ? 100 : 1000)
 
   useEffect(() => {
-    if (peek?.tone === 'yell') void ambience.hiss()
-  }, [peek?.id, peek?.tone])
+    if (peek?.tone === 'yell' && sound) void ambience.hiss()
+  }, [peek?.id, peek?.tone, sound])
 
   useEffect(() => {
     if (!peek || peek.tone !== 'yell') return

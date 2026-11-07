@@ -59,7 +59,7 @@ class Ambience {
       if (!this.hissAudio) {
         const audio = new Audio(HISS_SRC)
         audio.preload = 'auto'
-        audio.volume = 0.9
+        audio.volume = 0.75
         this.hissAudio = audio
       }
       this.hissAudio.currentTime = 0
