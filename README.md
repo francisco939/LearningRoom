@@ -6,7 +6,7 @@
 
 浏览器打开即用，无需登录；记录只保存在本机。
 
-**状态**：单人本地 MVP 已完成，可构建、可部署。线上 GitHub Pages 已开启，但当前 **Source 指向 `main` 分支根目录**，打开是空白页；需要改成 **GitHub Actions** 才会发布构建产物（见「部署」）。
+**状态**：单人本地 MVP 已完成，线上 GitHub Pages 已部署并验证可访问：`https://francisco939.github.io/LearningRoom/`。首次打开如果仍是旧空白页，用无痕窗口或 Ctrl+Shift+R 强制刷新。
 
 [接手项目？先读交接文档 →](docs/HANDOFF.md) · [玩法与状态机](docs/product.md) · [素材与许可](ASSETS.md)
 
@@ -125,7 +125,7 @@ scripts/          素材处理脚本（肖像/音频/图标、视频切帧抠像
 
 仓库自带 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)：push 到 `main` 后跑 `npm run verify`，然后检查 Pages 是否启用；启用则发布，未启用则跳过 deploy 并输出提示。
 
-**必须选择 GitHub Actions，不能选 “Deploy from a branch”**：
+**当前已配置为 GitHub Actions，deploy 成功。** 新仓库 / 重建 Pages 时必须选择 GitHub Actions，不能选 “Deploy from a branch”：
 
 1. 打开仓库 **Settings → Pages → Build and deployment**。
 2. **Source** 选择 **GitHub Actions**（不是 `Deploy from a branch`）。
@@ -134,12 +134,12 @@ scripts/          素材处理脚本（肖像/音频/图标、视频切帧抠像
 
 目标地址：`https://francisco939.github.io/LearningRoom/`
 
-**如果打开是空白页**：
+**如果打开是空白页**（通常发生在刚切换 Source、或浏览器还缓存着旧 HTML）：
 
 - 查看网页源码，若入口还是 `<script src="/src/main.tsx">`，说明 Pages 正在发布仓库根目录（branch 模式），不是构建产物。
-- 在 **Settings → Pages** 把 Source 改成 **GitHub Actions**，重跑 `Deploy to GitHub Pages`。
+- 在 **Settings → Pages** 确认 Source 是 **GitHub Actions**，重跑 `Deploy to GitHub Pages`。
 - 构建产物的入口应该是 `/LearningRoom/assets/index-*.js`，不是 `/src/main.tsx`。
-- 改完后用无痕窗口打开，或强制刷新，避免旧缓存。
+- 用无痕窗口打开，或 Ctrl+Shift+R 强制刷新；GitHub Pages 的 HTML 缓存约 10 分钟。
 
 > Vite 在 CI 中会自动把 `base` 设为 `/LearningRoom/`；本地构建仍然是 `/`。
 
@@ -170,7 +170,8 @@ scripts/          素材处理脚本（肖像/音频/图标、视频切帧抠像
 
 ## 路线图
 
-- [ ] 启用 GitHub Pages，补线上验收
+- [x] 启用 GitHub Pages（GitHub Actions 源，2026-11-08 部署成功）
+- [ ] 线上手工验收：计时 / 巡查 / 刷新恢复 / 离线
 - [ ] ErrorBoundary + 数据导出/导入
 - [ ] Playwright E2E（计时 / 巡查 / 刷新恢复）
 - [ ] 移动端与 Safari 实机适配

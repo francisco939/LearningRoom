@@ -20,9 +20,9 @@
 
 2. **读产品规则**：[docs/product.md](product.md) 里有计时状态机、巡查规则、鱼干/连续天数公式、存储结构。
 
-3. **把 GitHub Pages 的 Source 改成 GitHub Actions**（当前已开启，但源是 `main` 分支根目录，线上空白）：
-   仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**，然后重跑 `Deploy to GitHub Pages` 工作流。
-   如果保留 `Deploy from a branch`，Pages 会发布仓库根目录的 `index.html`，入口指向 `/src/main.tsx`，线上就是空白页。
+3. **确认 GitHub Pages 的 Source 是 GitHub Actions**（2026-11-08 已切换并部署成功）：
+   仓库 **Settings → Pages → Build and deployment → Source** 应为 **GitHub Actions**。
+   如果误选 `Deploy from a branch`，Pages 会发布仓库根目录的 `index.html`，入口指向 `/src/main.tsx`，线上就是空白页。
 
 ---
 
@@ -32,15 +32,15 @@
 | --- | --- |
 | 仓库 | https://github.com/francisco939/LearningRoom |
 | 默认分支 | `main` |
-| 线上地址 | `https://francisco939.github.io/LearningRoom/`（**当前空白：Pages 源为 branch/root，需改 GitHub Actions**） |
-| CI | `.github/workflows/deploy.yml`（自定义构建/部署）+ GitHub 的 `pages build and deployment`（branch 模式遗留）；最近一次均成功，但 branch 产物入口是 `/src/main.tsx`，所以页面空白 |
+| 线上地址 | `https://francisco939.github.io/LearningRoom/`（**已部署并验证**，2026-11-08；首次打开如空白请强刷） |
+| CI | `.github/workflows/deploy.yml`（自定义构建/部署）成功；Pages Source 已改为 GitHub Actions，旧的 `pages build and deployment` 不再作为发布源 |
 | 代码许可 | MIT（`LICENSE`） |
 | 素材许可 | 单独说明，见 [ASSETS.md](../ASSETS.md)；**不全是 MIT** |
 | 运行形态 | 纯静态 SPA，无后端、无账号、无云同步 |
 | Node | 开发机 v24.19.0；CI 用 Node 24 |
 | 包管理 | npm 11（`package-lock.json` 已提交） |
 
-**权限提醒**：Pages 设置、仓库设置、自定义域名都只有仓库 owner（francisco939）能改。接手者如果不是 owner，需要 owner 协助把 Pages 的 Source 切换为 **GitHub Actions**。
+**权限提醒**：Pages 设置、仓库设置、自定义域名都只有仓库 owner（francisco939）能改。接手者如果不是 owner，改 Pages 源/自定义域名需要 owner 协助。
 
 ---
 
@@ -331,7 +331,9 @@ python scripts/prepare-video-frames.py
 3. 保存后重新运行 `Deploy to GitHub Pages`（或再 push 一次）。
 4. 等 deploy 任务变绿，访问 `https://francisco939.github.io/LearningRoom/`。
 
-**当前状态（2026-11-08）**：Pages 已开启，但 Source 是 `Deploy from a branch`（`main` / root）。所以：
+**当前状态（2026-11-08）**：Source 已切换为 **GitHub Actions**，`Deploy to GitHub Pages` 部署成功，线上已验证可打开。下面保留故障排查，供重建或换仓库时使用。
+
+**如果 Source 还是 `Deploy from a branch`（`main` / root）**：
 
 - `pages build and deployment` 成功发布的是仓库根目录的 `index.html`；
 - 该 HTML 的入口是 `<script src="/src/main.tsx">`，浏览器 404；
@@ -349,7 +351,7 @@ curl -s https://francisco939.github.io/LearningRoom/ | findstr "/LearningRoom/as
 
 浏览器里也可以 `view-source:` 看入口；正确入口应为 `/LearningRoom/assets/index-*.js`。
 
-**切换后如果还是空白**：用无痕窗口 / 强制刷新（Ctrl+Shift+R）；之前 branch 版本没有注册 SW，一般不需要清 Service Worker。
+**切换后如果还是空白**：用无痕窗口 / 强制刷新（Ctrl+Shift+R）。GitHub Pages 的 HTML 缓存约 10 分钟；之前 branch 版本没有注册 SW，一般不需要清 Service Worker。
 
 ### 8.2 发布流程
 
@@ -373,9 +375,11 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 
 ## 9. 已知问题 / 技术债
 
+> Pages 源配置问题已于 2026-11-08 修复；下表只列仍存在的问题。
+
 | 优先级 | 问题 | 影响 | 建议 |
 | --- | --- | --- | --- |
-| **P0** | Pages Source 是 `Deploy from a branch` | 线上空白：发布的是根目录 dev HTML，`/src/main.tsx` 404 | owner 在 Settings → Pages 改成 **GitHub Actions**，重跑 deploy |
+| P2 | Pages 切换后旧 HTML 缓存 | 首次打开可能仍是空白页 | 无痕窗口 / Ctrl+Shift+R；HTML 缓存约 10 分钟 |
 | P1 | 没有 E2E；hooks 未测 | 巡查/计时回归只能手测 | 加 Playwright：1 分钟 session + 强制巡查 |
 | P1 | 移动端未在真机审过 | 小屏可能挤压/遮挡 | 390×844、iPhone Safari、横屏各跑一遍 |
 | P1 | 无 ErrorBoundary | 运行时异常白屏 | 加 React ErrorBoundary + 上报 |
@@ -401,13 +405,13 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 
 ## 10. 接力路线图（建议顺序）
 
-### P0 — 让线上可用（0.5 天）
+### P0 — 让线上可用（已完成 2026-11-08）
 
-- 把 Pages 的 Source 从 `Deploy from a branch` 改成 **GitHub Actions**。
-- 重跑 `Deploy to GitHub Pages`，确认 deploy 成功。
-- 确认页面入口是 `/LearningRoom/assets/index-*.js`，不是 `/src/main.tsx`。
-- 打开线上地址，跑一遍手工清单（至少计时/巡查/刷新/离线）。
-- 把线上 URL 与状态写回 README。
+- [x] Pages Source 改为 **GitHub Actions**，`Deploy to GitHub Pages` 部署成功。
+- [x] 页面入口是 `/LearningRoom/assets/index-*.js`，不是 `/src/main.tsx`。
+- [x] 线上地址可打开，首屏与引导正常。
+- [ ] 在线上跑一遍手工清单（计时/巡查/刷新/离线），建议接手后第一件事补上。
+- [ ] 把线上验收结果补进 README 的「已知限制 / 路线图」。
 
 ### P1 — 质量补强（2–3 天）
 
@@ -459,7 +463,7 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 部署            .github/workflows/deploy.yml
 ```
 
-**最后一次验证**：`npm run verify` 通过；73 tests；JS 96.7KB gzip；PWA 预缓存约 2.55MB。
+**最后一次验证**：`npm run verify` 通过；73 tests；JS 96.7KB gzip；PWA 预缓存约 2.55MB。线上 `https://francisco939.github.io/LearningRoom/` 已于 2026-11-08 打开验证，入口 `/LearningRoom/assets/index-*.js` 正常、首屏与引导可见。
 
 ---
 
