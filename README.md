@@ -2,20 +2,22 @@
 
 > 一只退休的监学猫，陪你把这一轮坐完。
 
-一个**混合型单人在线自习室**：Stillwhere 式的场景与计时氛围，加一点 Redwatch 式的巡查压力——但监督者换成一只上了年纪的橘猫「耄耋」，而且**不碰摄像头**。
+一个**混合型单人在线自习室**：Stillwhere 式的场景与计时氛围，加一点 Redwatch 式的巡查压力——监督者换成一只上了年纪的橘猫「耄耋」，而且**不碰摄像头**。
 
 浏览器打开即用，无需登录；记录只保存在本机。
 
+**状态**：单人本地 MVP 已完成，可构建、可部署。线上 GitHub Pages **尚未启用**（见「部署」）。
+
+[接手项目？先读交接文档 →](docs/HANDOFF.md) · [玩法与状态机](docs/product.md) · [素材与许可](ASSETS.md)
+
 ![主界面](docs/screenshots/hero.webp)
 
-> 截图使用仓库内的 Seedream 16:9 高清场景图；替换 `public/scenes/` 下的同名文件即可换景。
+## 这是什么
 
-## 它是什么
-
-- **场景**：雨夜书房 / 黄昏图书馆 / 清晨书桌。支持 **16:9 高清摄影场景**（放进 `public/scenes/` 自动启用，带淡入与压暗层），缺图时回退到原创 SVG 房间。生成提示词见 [docs/scene-prompts.md](docs/scene-prompts.md)。
-- **计时**：番茄钟 / 倒计时 / 秒表，支持自定义时长、轮数、自动开始休息。
-- **耄耋突袭**：专注中老猫会不定时从**窗边或屏幕边缘**探出头来，15 秒内按空格或点「喵」；切走标签页超时，它会**张嘴哈气**、扣星，三颗星扣光这一轮作废。探头/哈气来自 Seedream 视频，已切成 **15fps 帧并预抠像**成 sprite sheet（`peek-sheet.webp` / `yell-sheet.webp`），由 canvas 逐帧播放；没加载到帧时回退到静态贴纸。
-- **只监督在场**：不打开摄像头，不读屏幕，只看你是否还在、是否应声。
+- **场景**：雨夜书房 / 黄昏图书馆 / 清晨书桌，三张 16:9 高清 Seedream 场景；加载失败时回退到原创 SVG 房间。
+- **计时**：番茄钟 / 倒计时 / 秒表，可自定义时长、轮数、自动开始休息。
+- **耄耋突袭**：专注中老猫会不定时从窗边或屏幕边缘探头，15 秒内按空格或点「喵」；切走标签页超时，它会张嘴哈气、扣星，三颗星扣光这一轮作废。
+- **只监督在场**：不打开摄像头、不读屏幕，只看标签页可见性、键鼠活动和是否应声。
 - **成长**：小鱼干、连续天数、5 级「猫的认可」、13 个成就、专注历史与 7 日统计。
 - **离线可用**：PWA，可安装到桌面/主屏；断网后第二次打开仍能继续。
 
@@ -40,35 +42,7 @@
 
 </details>
 
-## 玩法与规则
-
-| 项 | 规则 |
-| --- | --- |
-| 星级 | 每场 3 颗；离座 / 查岗未应各扣 1 颗；同一类违规 30 秒冷却 |
-| 巡查间隔 | 宽松 8–15 分钟 / 标准 4–8 分钟 / 严格 2–4 分钟；首轮固定在 60–120 秒 |
-| 离座判定 | 标签页隐藏超过宽限（90 / 45 / 20 秒） |
-| 查岗 | 气泡出现后 15 秒内回应，超时扣星 |
-| 无操作 | 只触发查岗，不直接扣星（避免「在看书」被误判） |
-| 小鱼干 | 完成一场：`floor(专注秒数 / 600) + 剩余星数`；失败 0；主动中止半速 |
-| 连续天数 | 只有「完成」的场次计入；业务日按本地时间 **04:00** 切换 |
-| 等级 | 0 / 5h / 20h / 50h / 100h → 陌生猫 / 面熟 / 常客 / 猫友 / 耄耋认可 |
-
-更细的状态机、公式与存储结构见 [docs/product.md](docs/product.md)。
-
-## 技术栈
-
-- **Vite 7 + React 19 + TypeScript**
-- **Tailwind CSS 4**（`@theme` 设计令牌）
-- **Fraunces Variable + Manrope Variable**（拉丁/数字），中文回退系统宋体/苹方
-- **Zustand**（三套 store：设置 / 进度 / 会话）
-- **vite-plugin-pwa**（离线缓存 + 安装）
-- 纯 CSS/SVG/Canvas 场景，无 3D 引擎、无动画库
-- 音频：HTMLAudioElement 雨声循环 + Web Audio 提示音
-- 测试：Vitest（73 个用例，覆盖计时、巡查、进度、存储）
-
-首屏 JS 约 **97 KB gzip**，总资源约 **2.5 MB**（含三张高清场景、猫图、帧动画、雨声与字体）。
-
-## 本地运行
+## 快速开始
 
 需要 Node 20.19+ / 22.12+ / 24。
 
@@ -80,33 +54,52 @@ npm run dev
 打开 `http://localhost:5173`。
 
 ```bash
-npm run test     # 单元测试
+npm run test     # 单元测试（73 个用例）
 npm run lint     # ESLint
 npm run build    # 类型检查 + 生产构建
-npm run verify   # lint + test + build
+npm run verify   # lint + test + build（提交前跑）
+npm run preview  # 预览生产构建
 ```
 
-> Windows + DSH 沙箱里 npm 缓存默认在用户目录，可能 `EPERM`；把缓存指到项目内：
-> `$env:npm_config_cache = "$PWD\.npm-cache"`。
+> Windows / DSH 沙箱里 npm 缓存可能 `EPERM`：先设 `$env:npm_config_cache = "$PWD\.npm-cache"`。
+> Vite 构建如果需要 esbuild 子进程，沙箱下要给命令完整权限。更多坑见 [HANDOFF.md](docs/HANDOFF.md#52-windows--dsh-沙箱的坑重要)。
 
-## 部署
+## 玩法一屏
 
-仓库自带 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)：push 到 `main` 后自动跑 `npm run verify`，然后尝试发布到 GitHub Pages。
+| 项 | 规则 |
+| --- | --- |
+| 星级 | 每场 3 颗；离座 / 查岗未应各扣 1 颗；同类违规 30 秒冷却 |
+| 巡查间隔 | 宽松 8–15 分钟 / 标准 4–8 分钟 / 严格 2–4 分钟；首轮 60–120 秒 |
+| 离座判定 | 标签页隐藏超过宽限（90 / 45 / 20 秒） |
+| 查岗 | 气泡出现后 15 秒内回应，超时扣星 |
+| 无操作 | 只触发查岗，不直接扣星（避免「在看书」误判） |
+| 小鱼干 | 完成：`floor(专注秒数 / 600) + 剩余星数`；失败 0；主动中止半速 |
+| 连续天数 | 只算「完成」的场次；业务日按本地时间 **04:00** 切换 |
+| 等级 | 0 / 5h / 20h / 50h / 100h → 陌生猫 / 面熟 / 常客 / 猫友 / 耄耋认可 |
 
-**首次使用需手动启用一次**：仓库 **Settings → Pages → Source** 选择 **GitHub Actions**。未启用时工作流仍会完成构建（deploy 任务自动跳过），启用后重新运行即可发布。
+更细的状态机、公式、存储结构见 [docs/product.md](docs/product.md)。
 
-线上地址：`https://francisco939.github.io/LearningRoom/`
+## 技术栈
 
-Vite 会根据 `GITHUB_ACTIONS` 自动把 `base` 设为 `/LearningRoom/`。
+- **Vite 7 + React 19 + TypeScript**
+- **Tailwind CSS 4**（`@theme` 设计令牌）+ 手写场景/动画 CSS
+- **Fraunces Variable + Manrope Variable**（拉丁/数字，OFL），中文回退系统宋体/苹方
+- **Zustand**：设置 / 进度 / 会话三套 store
+- **vite-plugin-pwa**：离线缓存 + 安装
+- 场景用高清图 + SVG 回退；巡查用 **sprite sheet + canvas 逐帧播放**
+- 音频：HTMLAudioElement 雨声/哈气 + Web Audio 提示音
+- 测试：Vitest + jsdom
 
-## 目录
+首屏 JS 约 **97 KB gzip**；PWA 预缓存约 **2.55 MB**（含三张高清场景、帧动画、音频与字体）。
+
+## 工程结构
 
 ```
 src/
   components/
-    scene/        场景原语：窗户、雨、桌子、台灯、相框
+    scene/        场景图/回退：窗户、雨、桌子、台灯
     timer/        计时显示、进度环、控制条、模式切换
-    supervisor/   耄耋相框、气泡、查岗、记过印章
+    supervisor/   相框、探头帧播放、气泡、查岗、记过
     panels/       历史、成就、设置、引导、结算
     hud/          顶栏
   store/          settings / progress / session
@@ -114,6 +107,7 @@ src/
   lib/            纯函数：计时状态机、巡查规则、进度/成就、统计、存储、音频
   data/           场景、成就、猫台词、等级
 docs/
+  HANDOFF.md       交接文档（先读）
   product.md       玩法、公式、状态机、存储
   scene-prompts.md Seedream 高清场景提示词
   video-prompts.md 耄耋探头/哈气视频提示词
@@ -121,38 +115,71 @@ docs/
   screenshots/     README 截图
 public/
   scenes/         高清场景图（缺图自动回退 SVG）
-  supervisor/     耄耋肖像、探头贴纸、帧动画 sprite sheet
-  audio/          雨声循环
+  supervisor/     肖像、静态贴纸、帧动画 sprite sheet + manifest
+  audio/          雨声循环、真实哈气声
   icons/          PWA 图标
-scripts/          素材处理脚本
+scripts/          素材处理脚本（肖像/音频/图标、视频切帧抠像）
 ```
+
+## 部署
+
+仓库自带 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)：push 到 `main` 后跑 `npm run verify`，然后检查 Pages 是否启用；启用则发布，未启用则跳过 deploy 并输出提示。
+
+**首次使用需手动启用一次**：
+
+1. 打开仓库 **Settings → Pages**。
+2. **Source** 选择 **GitHub Actions**。
+3. 重新运行 `Deploy to GitHub Pages` 工作流（或再 push 一次）。
+
+目标地址：`https://francisco939.github.io/LearningRoom/`
+
+> 当前 Pages 未启用，线上是 404；CI 构建是绿的。Vite 在 CI 中会自动把 `base` 设为 `/LearningRoom/`。
 
 ## 素材与许可
 
-- 代码：[MIT](LICENSE)
-- 督学肖像：john gosk，Flickr，**Public Domain Mark 1.0**
-- 雨声：seth-m，Freesound `270349`，**CC0 1.0**
-- 场景 / 猫脸 SVG / 图标：本项目原创
+代码是 **MIT**；素材单独授权，**不要只引用 MIT**：
+
+| 素材 | 来源 | 许可 |
+| --- | --- | --- |
+| 督学肖像 / 探头贴纸 | 项目作者提供（豆包 AI 生成） | 作者保留权利，仅用于本项目 |
+| 三张高清场景 | 项目作者用 Seedream 生成 | 作者保留权利，仅用于本项目 |
+| 雨声 | seth-m / Freesound 270349 | CC0 1.0 |
+| 哈气声 | Zabuhailo / Wikimedia Commons | CC0 1.0 |
+| 场景/猫脸 SVG、图标 | 本项目原创 | MIT |
+| Fraunces / Manrope 字体 | Fontsource | SIL OFL 1.1 |
 
 完整署名、处理方式与备用素材见 [ASSETS.md](ASSETS.md)。
 
 > 「耄耋」是原创致敬角色，灵感来自中文互联网上「上了年纪、脾气不好、眯眼看人」的老橘猫形象。本项目**不使用**真实「圆头猫爹 / 圆头耄耋」的影像，也不包含与虐猫梗相关的内容。设置里可以上传自己的图替换督学形象（只保存在本机）。
 
+## 已知限制
+
+- **纯本地**：没有账号/云同步；清浏览器数据即全部丢失，目前也没有导出入口。
+- **没有摄像头监督**：这是产品边界，不是缺失；只做「在场」判断。
+- **移动端未做真机审计**：布局已做响应式，但还没在 390×844 / iPhone Safari 上逐项验收。
+- **帧动画约 1 MB**：探头 83 帧 + 哈气 73 帧，低端机首次加载可能慢；失败会回退静态贴纸。
+- **没有 E2E**：hooks、帧播放、PWA 目前靠手工清单，重构巡查逻辑时请补测试。
+
 ## 路线图
 
-- [ ] 云同步与账号（本地数据模型已留出 `Repository` 接缝）
+- [ ] 启用 GitHub Pages，补线上验收
+- [ ] ErrorBoundary + 数据导出/导入
+- [ ] Playwright E2E（计时 / 巡查 / 刷新恢复）
+- [ ] 移动端与 Safari 实机适配
+- [ ] 账号与云同步（`lib/repository.ts` 已留接缝）
 - [ ] 多人「一起自习」房间（SSE / WebSocket）
-- [ ] 自定义场景包与音频包
-- [ ] 更细的统计与周报
+- [ ] DAY Cycle / 自定义场景包 / 音频包
 - [ ] Windows 桌面悬浮窗
 
-## 研究底稿
+## 文档
 
-这个项目的场景、计时与「轻监督」取舍，来自对两个真实产品的拆解：
-
-- [凛冬督学局（redwatch.top）](docs/research/01-redwatch.md)
-- [Stillwhere（stillwhere.app）](docs/research/02-stillwhere.md)
-- [在线自习室品类图谱](docs/research/03-landscape.md)
-- [LearningRoom 架构建议](docs/research/04-learningroom-proposal.md)
-- [高清场景生成提示词](docs/scene-prompts.md)
-- [耄耋探头/哈气视频提示词](docs/video-prompts.md)
+- [交接文档](docs/HANDOFF.md)：现状、架构、资产管线、坑、接力顺序
+- [玩法与状态机](docs/product.md)
+- [高清场景提示词](docs/scene-prompts.md)
+- [探头/哈气视频提示词](docs/video-prompts.md)
+- [素材与许可](ASSETS.md)
+- 研究底稿：
+  - [凛冬督学局（redwatch.top）](docs/research/01-redwatch.md)
+  - [Stillwhere（stillwhere.app）](docs/research/02-stillwhere.md)
+  - [在线自习室品类图谱](docs/research/03-landscape.md)
+  - [LearningRoom 架构建议](docs/research/04-learningroom-proposal.md)
