@@ -54,7 +54,9 @@ export interface Settings {
   scene: SceneId
   sound: boolean
   volume: number
+  catName: string
   hasCustomCat: boolean
+  supervisionEnabled: boolean
   reducedMotion: 'system' | 'on' | 'off'
 }
 

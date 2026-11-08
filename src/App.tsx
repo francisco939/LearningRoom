@@ -45,6 +45,7 @@ export default function App() {
   const reduced = useReducedMotion()
   const now = useNow(500)
   const { image } = useCatImage()
+  const supervisionEnabled = settings.supervisionEnabled
 
   const [panel, setPanel] = useState<PanelId>(null)
   const [onboarding, setOnboarding] = useState(!progress.onboarded)
@@ -76,6 +77,7 @@ export default function App() {
       __lrPeek?: (tone: 'patrol' | 'yell', anchor?: 'window' | 'right' | 'left' | 'bottom') => void
     }
     w.__lrPeek = (tone, anchor = 'window') => {
+      if (!useSettings.getState().settings.supervisionEnabled) return
       const session = useSession.getState()
       if (tone === 'patrol') session.setPatrol(Date.now() + 15_000, anchor)
       else session.showPeek(anchor, 'yell')
@@ -97,7 +99,7 @@ export default function App() {
   return (
     <div
       className={
-        peek?.tone === 'yell'
+        supervisionEnabled && peek?.tone === 'yell'
           ? 'stage-shake relative h-[100dvh] w-full overflow-hidden'
           : 'relative h-[100dvh] w-full overflow-hidden'
       }
@@ -139,10 +141,19 @@ export default function App() {
           </div>
         </main>
 
-        <PortraitFrame image={image} state={catState} away={Boolean(peek)} />
-        <CatBubble />
-        <PeekCat />
-        {peek?.tone === 'yell' && <div key={peek.id} className="scene-flash" aria-hidden />}
+        {supervisionEnabled && (
+          <>
+            <PortraitFrame
+              image={image}
+              name={settings.catName}
+              state={catState}
+              away={Boolean(peek)}
+            />
+            <CatBubble />
+            <PeekCat />
+            {peek?.tone === 'yell' && <div key={peek.id} className="scene-flash" aria-hidden />}
+          </>
+        )}
 
         <div className="scene-label absolute bottom-7 left-7 z-20 hidden select-none sm:block">
           <div className="flex items-center gap-2 text-[10px] tracking-[0.42em] text-paper/40">
@@ -165,7 +176,7 @@ export default function App() {
       <SettingsPanel open={panel === 'settings'} onClose={() => setPanel(null)} />
       <ResultOverlay onOpenHistory={() => setPanel('history')} />
       <Onboarding open={onboarding} onDone={() => setOnboarding(false)} />
-      <ViolationStamp />
+      {supervisionEnabled && <ViolationStamp />}
     </div>
   )
 }

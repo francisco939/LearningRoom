@@ -47,7 +47,9 @@ export function ResultOverlay({ onOpenHistory }: ResultOverlayProps) {
                 ? '三颗星都没了。耄耋把门关上，让你明天再来。'
                 : aborted
                   ? '你主动结束了这一轮。已专注的时间仍然记下。'
-                  : '耄耋打了个哈欠，把尾巴从你脚边收回去。'}
+                  : settings.supervisionEnabled
+                    ? '耄耋打了个哈欠，把尾巴从你脚边收回去。'
+                    : '这一轮按你的节奏坐完了。'}
             </p>
           </div>
           <button
@@ -60,10 +62,17 @@ export function ResultOverlay({ onOpenHistory }: ResultOverlayProps) {
           </button>
         </div>
 
-        <div className="mt-6 grid grid-cols-3 gap-2">
+        <div
+          className={cn(
+            'mt-6 grid gap-2',
+            settings.supervisionEnabled ? 'grid-cols-3' : 'grid-cols-2',
+          )}
+        >
           <Metric label="专注" value={formatDuration(session.focusedSec)} />
           <Metric label="鱼干" value={`+${session.fishEarned}`} icon={<Fish size={13} />} />
-          <Metric label="星级" value={`${session.starsLeft} / 3`} icon={<Star size={13} />} />
+          {settings.supervisionEnabled && (
+            <Metric label="星级" value={`${session.starsLeft} / 3`} icon={<Star size={13} />} />
+          )}
         </div>
 
         <div className="mt-4 flex items-center justify-between rounded-xl border border-paper/8 bg-black/20 px-3.5 py-2.5 text-[11px] text-paper/45">

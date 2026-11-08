@@ -75,7 +75,17 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
         </Section>
 
         <Section title="耄耋的巡查">
-          <div className="grid gap-2">
+          <Toggle
+            label="启用耄耋监督"
+            checked={settings.supervisionEnabled}
+            onChange={(checked) => update({ supervisionEnabled: checked })}
+          />
+          <div
+            className={cn(
+              'grid gap-2 transition',
+              !settings.supervisionEnabled && 'pointer-events-none opacity-35',
+            )}
+          >
             {SUPERVISION.map((item) => (
               <button
                 key={item.id}
@@ -102,7 +112,9 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
             ))}
           </div>
           <p className="text-[12px] leading-relaxed text-paper/35">
-            耄耋只看你是否在场：切走标签页、查岗不应声会扣星；它不打开摄像头。
+            {settings.supervisionEnabled
+              ? '耄耋只看你是否在场：切走标签页、查岗不应声会扣星；它不打开摄像头。'
+              : '纯自习模式：没有探头、查岗和扣星，计时、记录与场景照常。'}
           </p>
         </Section>
 
@@ -173,21 +185,38 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
         </Section>
 
         <Section title="督学形象">
-          <div className="flex items-center gap-4">
-            <div className="h-[90px] w-[72px] shrink-0 overflow-hidden rounded border border-paper/15 bg-black/30">
+          <label className="block">
+            <span className="text-[12px] tracking-wider text-paper/40">督学名字</span>
+            <input
+              type="text"
+              value={settings.catName}
+              maxLength={8}
+              placeholder="耄耋"
+              onChange={(event) => update({ catName: event.target.value })}
+              onBlur={() => {
+                const name = settings.catName.trim() || '耄耋'
+                if (name !== settings.catName) update({ catName: name })
+              }}
+              className="mt-1.5 w-full rounded-lg border border-paper/10 bg-black/20 px-3 py-2 text-[14px] text-paper/85 outline-none transition focus:border-amber/45"
+            />
+            <span className="mt-1 block text-[11px] text-paper/30">显示在相框下方，最多 8 个字</span>
+          </label>
+
+          <div className="mt-5 flex items-center gap-4">
+            <div className="relative h-[90px] w-[72px] shrink-0 overflow-hidden rounded border border-paper/15 bg-black/30">
               {image ? (
                 <img src={image} alt="自定义督学形象" className="h-full w-full object-cover" />
               ) : (
                 <img
                   src={`${import.meta.env.BASE_URL}supervisor/maodie.webp`}
-                  alt="默认督学耄耋"
+                  alt="默认督学形象"
                   className="h-full w-full object-cover"
                 />
               )}
             </div>
             <div className="flex-1">
               <p className="text-[12px] leading-relaxed text-paper/40">
-                默认是公有领域的 22 岁橘猫肖像。你也可以换成自己的图，只保存在本机。
+                默认是项目自带的橘猫肖像。也可以换成自己的图，只保存在本机。
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
@@ -203,7 +232,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                     onClick={() => void remove()}
                     className="inline-flex items-center gap-1.5 rounded-full border border-paper/15 px-3 py-1.5 text-[12px] text-paper/55 transition hover:bg-paper/10"
                   >
-                    <Trash2 size={13} /> 恢复默认
+                    <Trash2 size={13} /> 移除图片
                   </button>
                 )}
               </div>
@@ -221,6 +250,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
               />
             </div>
           </div>
+
         </Section>
 
         <Section title="动效">

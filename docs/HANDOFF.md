@@ -14,7 +14,7 @@
    git clone https://github.com/francisco939/LearningRoom.git
    cd LearningRoom
    npm install
-   npm run verify     # lint + 74 个单测 + tsc + build
+   npm run verify     # lint + 80 个单测 + tsc + build
    npm run dev
    ```
 
@@ -116,6 +116,7 @@ flowchart LR
   - 离座看 `visibilitychange`，超过宽限扣星；
   - 无操作只触发查岗，不直接扣星（避免「在看书」误判）；
   - 页面隐藏时错过的巡查 5 秒后重试；
+  - `supervisionEnabled=false` 时整个 hook 停止调度/visibility 监听，并清掉 patrol、peek、stamp；App 同时隐藏猫、气泡、记过和等级条。
   - **StrictMode 首轮巡查**曾因二次 effect 变成 4–8 分钟，已用 `hasPatrolled` ref 修；改这里时别退回 `firstRef` 写法。
 - 查岗：`useSession.setPatrol(deadline, anchor)` 同时写入 `peek` 状态；超时/离座调 `showPeek(anchor,'yell')` + `violation()`。
 - 帧播放：`PeekVisual` 读取 `peek.json` / `yell.json`，从 sprite sheet 逐帧画到 canvas；最后一帧保持。
@@ -125,7 +126,7 @@ flowchart LR
 
 | Key | 内容 |
 | --- | --- |
-| `lr.settings.v1` | 模式、时长、轮数、监督档、场景、声音、音量、自定义猫图标记、动效偏好 |
+| `lr.settings.v1` | 模式、时长、轮数、监督档、`supervisionEnabled`、`catName`、场景、声音、音量、自定义猫图标记、动效偏好 |
 | `lr.progress.v1` | 累计专注、场次、鱼干、连续天数、场景集合、成就、是否看过引导 |
 | `lr.sessions.v1` | 最近 1000 场记录 |
 | `lr.active.v1` | 运行中 `TimerState` 快照 |
@@ -181,7 +182,7 @@ IndexedDB（`idb-keyval`）：`lr-cat-image` 存用户上传的督学图（最�
 | `npm run build` | `tsc --noEmit && vite build` |
 | `npm run preview` | 预览生产构建 |
 | `npm run lint` | ESLint 9（含 react-hooks 严格规则） |
-| `npm run test` | Vitest（4 个文件，74 个用例） |
+| `npm run test` | Vitest（6 个文件，80 个用例） |
 | `npm run verify` | lint + test + build，提交前必跑 |
 
 ### 5.2 Windows / DSH 沙箱的坑（重要）
@@ -225,6 +226,8 @@ src/test/timer.test.ts         33 例：启动/暂停/恢复/跳过/违规/中�
 src/test/supervision.test.ts   11 例：三档配置、首轮区间、宽限边界、冷却
 src/test/progress.test.ts      23 例：鱼干公式、04:00 切日、连续天数、13 个成就
 src/test/session.test.ts        7 例：buildDraftSession 状态/时长映射
+src/test/settings.test.ts       4 例：catName / supervisionEnabled 迁移与边界
+src/test/portrait.test.tsx      2 例：相框名字显示与空值回退
 ```
 
 **没覆盖的**：React hooks（`useSupervisor` / `useTimerEngine`）、帧播放、音频、PWA、真实浏览器布局、移动端。改巡查 hook 时请补测试或至少手工跑清单。
@@ -391,6 +394,7 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 | P3 | 字体包含多余子集 | 构建多 ~150KB | 只保留 latin 子集 |
 | P3 | 动画/场景无 DAY Cycle | 内容新鲜感有限 | 按时间切场景色调 |
 | P3 | 没有移动端/桌面端布局截图基线 | 视觉回归无参照 | 固化 Playwright 截图 |
+| P3 | 督学视频上传/自动处理未实现（明确不做） | 只能换图片或构建期 sprite sheet | 如确要做，需浏览器抽帧 + 抠像 + IndexedDB，成本高 |
 
 **不要踩的回归点**：
 
@@ -463,7 +467,7 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 部署            .github/workflows/deploy.yml
 ```
 
-**最后一次验证**：`npm run verify` 通过；74 tests；JS 96.9KB gzip；PWA 预缓存约 2.55MB。线上 `https://francisco939.github.io/LearningRoom/` 已于 2026-11-08 打开验证，入口 `/LearningRoom/assets/index-*.js` 正常、首屏与引导可见。
+**最后一次验证**：`npm run verify` 通过；80 tests；JS 97.4KB gzip；PWA 预缓存约 2.56MB。线上 `https://francisco939.github.io/LearningRoom/` 已于 2026-11-08 打开验证，入口 `/LearningRoom/assets/index-*.js` 正常、首屏与引导可见。
 
 ---
 

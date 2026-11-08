@@ -1,5 +1,6 @@
 import { Fish, Flame, History, Settings, Trophy, PawPrint } from 'lucide-react'
 import { useProgress } from '@/store/useProgress'
+import { useSettings } from '@/store/useSettings'
 import { levelFor } from '@/data/levels'
 import { cn } from '@/lib/cn'
 
@@ -11,6 +12,7 @@ interface TopBarProps {
 
 export function TopBar({ onOpenHistory, onOpenAchievements, onOpenSettings }: TopBarProps) {
   const progress = useProgress((s) => s.progress)
+  const catEnabled = useSettings((s) => s.settings.supervisionEnabled)
   const level = levelFor(progress.totalFocusSec)
   const nextHours = level.next?.minHours ?? level.current.minHours
   const prevHours = level.current.minHours
@@ -30,19 +32,21 @@ export function TopBar({ onOpenHistory, onOpenAchievements, onOpenSettings }: To
             LearningRoom
           </div>
           <div className="hidden text-[11px] tracking-[0.32em] text-paper/45 sm:block">
-            耄 耋 自 习 室
+            自 习 室
           </div>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="hidden items-center gap-2 rounded-full border border-paper/10 bg-black/25 px-3.5 py-2 sm:flex">
-          <span className="text-[11px] tracking-widest text-paper/45">等级</span>
-          <span className="text-[13px] text-paper/85">{level.current.name}</span>
-          <span className="h-1.5 w-20 overflow-hidden rounded-full level-track">
-            <span className="block h-full level-fill" style={{ width: `${ratio * 100}%` }} />
-          </span>
-        </div>
+        {catEnabled && (
+          <div className="hidden items-center gap-2 rounded-full border border-paper/10 bg-black/25 px-3.5 py-2 sm:flex">
+            <span className="text-[11px] tracking-widest text-paper/45">等级</span>
+            <span className="text-[13px] text-paper/85">{level.current.name}</span>
+            <span className="h-1.5 w-20 overflow-hidden rounded-full level-track">
+              <span className="block h-full level-fill" style={{ width: `${ratio * 100}%` }} />
+            </span>
+          </div>
+        )}
 
         <Stat icon={<Fish size={15} />} label="鱼干" value={progress.fish} />
         <Stat icon={<Flame size={15} />} label="连续" value={progress.streak} suffix="天" />

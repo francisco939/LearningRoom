@@ -19,7 +19,9 @@ export const defaultSettings: Settings = {
   scene: 'rainy-study',
   sound: true,
   volume: 0.5,
+  catName: '耄耋',
   hasCustomCat: false,
+  supervisionEnabled: true,
   reducedMotion: 'system',
 }
 
@@ -64,6 +66,11 @@ export function loadSettings(): Settings {
   merged.breakMin = clamp(Number(merged.breakMin), 1, 60, defaultSettings.breakMin)
   merged.rounds = clamp(Number(merged.rounds), 1, 12, defaultSettings.rounds)
   merged.volume = clamp(Number(merged.volume), 0, 1, defaultSettings.volume)
+  merged.catName =
+    typeof merged.catName === 'string' && merged.catName.trim()
+      ? merged.catName.trim().slice(0, 8)
+      : defaultSettings.catName
+  merged.supervisionEnabled = merged.supervisionEnabled !== false
   return merged
 }
 

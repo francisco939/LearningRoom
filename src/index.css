@@ -465,8 +465,12 @@ button {
 }
 
 .portrait-plaque {
+  max-width: 100%;
   margin-top: 10px;
+  overflow: hidden;
   text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: var(--font-display);
   font-size: 12px;
   letter-spacing: 0.28em;

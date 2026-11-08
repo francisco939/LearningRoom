@@ -6,22 +6,24 @@ export type CatState = 'idle' | 'patrol' | 'sleep' | 'angry'
 
 interface PortraitFrameProps {
   image: string | null
+  name: string
   state: CatState
   away?: boolean
 }
 
 const DEFAULT_SRC = `${import.meta.env.BASE_URL}supervisor/maodie.webp`
 
-export function PortraitFrame({ image, state, away = false }: PortraitFrameProps) {
-  const [failed, setFailed] = useState(false)
+export function PortraitFrame({ image, name, state, away = false }: PortraitFrameProps) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null)
   const src = image ?? DEFAULT_SRC
-  const showImage = !failed
+  const displayName = name.trim() || '耄耋'
+  const showImage = failedSrc !== src
 
   return (
     <div
       className={cn('portrait', away && 'is-away')}
       data-state={state}
-      aria-label="耄耋督学"
+      aria-label={`${displayName}督学`}
       aria-hidden={away}
     >
       <div className="portrait-frame">
@@ -29,14 +31,16 @@ export function PortraitFrame({ image, state, away = false }: PortraitFrameProps
           <img
             className="portrait-img"
             src={src}
-            alt="一只上了年纪的橘猫，正眯着眼盯人"
-            onError={() => setFailed(true)}
+            alt={`${displayName}，一只上了年纪的橘猫，正眯着眼盯人`}
+            onError={() => setFailedSrc(src)}
           />
         ) : (
           <CatFace className="cat-fallback" />
         )}
       </div>
-      <div className="portrait-plaque">耄 耋</div>
+      <div className="portrait-plaque" title={displayName}>
+        {displayName}
+      </div>
     </div>
   )
 }

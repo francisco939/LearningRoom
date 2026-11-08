@@ -231,7 +231,9 @@ function readSettingsSnapshot(): Settings {
     scene: 'rainy-study',
     sound: true,
     volume: 0.5,
+    catName: '耄耋',
     hasCustomCat: false,
+    supervisionEnabled: true,
     reducedMotion: 'system',
   }
 }
