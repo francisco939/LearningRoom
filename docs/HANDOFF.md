@@ -20,9 +20,9 @@
 
 2. **读产品规则**：[docs/product.md](product.md) 里有计时状态机、巡查规则、鱼干/连续天数公式、存储结构。
 
-3. **启用 GitHub Pages**（目前线上还是 404）：
-   仓库 **Settings → Pages → Source** 选择 **GitHub Actions**，然后重跑 `Deploy to GitHub Pages` 工作流。
-   没有这一步，CI 会绿，但 `deploy` 任务会被跳过。
+3. **把 GitHub Pages 的 Source 改成 GitHub Actions**（当前已开启，但源是 `main` 分支根目录，线上空白）：
+   仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**，然后重跑 `Deploy to GitHub Pages` 工作流。
+   如果保留 `Deploy from a branch`，Pages 会发布仓库根目录的 `index.html`，入口指向 `/src/main.tsx`，线上就是空白页。
 
 ---
 
@@ -32,15 +32,15 @@
 | --- | --- |
 | 仓库 | https://github.com/francisco939/LearningRoom |
 | 默认分支 | `main` |
-| 线上地址 | `https://francisco939.github.io/LearningRoom/`（**待启用 Pages**） |
-| CI | `.github/workflows/deploy.yml`；最近一次 CI 成功，deploy 因 Pages 未启用而跳过 |
+| 线上地址 | `https://francisco939.github.io/LearningRoom/`（**当前空白：Pages 源为 branch/root，需改 GitHub Actions**） |
+| CI | `.github/workflows/deploy.yml`（自定义构建/部署）+ GitHub 的 `pages build and deployment`（branch 模式遗留）；最近一次均成功，但 branch 产物入口是 `/src/main.tsx`，所以页面空白 |
 | 代码许可 | MIT（`LICENSE`） |
 | 素材许可 | 单独说明，见 [ASSETS.md](../ASSETS.md)；**不全是 MIT** |
 | 运行形态 | 纯静态 SPA，无后端、无账号、无云同步 |
 | Node | 开发机 v24.19.0；CI 用 Node 24 |
 | 包管理 | npm 11（`package-lock.json` 已提交） |
 
-**权限提醒**：Pages 设置、仓库设置、自定义域名都只有仓库 owner（francisco939）能改。接手者如果不是 owner，需要 owner 协助完成一次 Pages 启用。
+**权限提醒**：Pages 设置、仓库设置、自定义域名都只有仓库 owner（francisco939）能改。接手者如果不是 owner，需要 owner 协助把 Pages 的 Source 切换为 **GitHub Actions**。
 
 ---
 
@@ -139,6 +139,7 @@ IndexedDB（`idb-keyval`）：`lr-cat-image` 存用户上传的督学图（最�
 - `push main` → Actions：`npm ci` → `npm run verify` → 检查 Pages 是否启用 → 上传 `dist` 工件 → 若启用则 `deploy-pages`。
 - `vite.config.ts`：`base = process.env.GITHUB_ACTIONS ? '/LearningRoom/' : '/'`。
 - 未启用 Pages 时，构建任务仍成功，`deploy` 跳过，并输出 notice。
+- **如果 Pages 的 Source 还是 “Deploy from a branch”**，GitHub 会另跑一条 `pages build and deployment`，发布 `main` 根目录；它和自定义 `deploy-pages` 是两条链路，页面最终看到的是 branch 的原始 `index.html`（入口 `/src/main.tsx`），因此空白。必须把 Source 改成 GitHub Actions。
 - 没有自定义域名、没有环境变量、没有 secrets。
 
 ---
@@ -242,7 +243,7 @@ src/test/session.test.ts        7 例：buildDraftSession 状态/时长映射
 
 ### 6.3 CI
 
-`npm run verify` 在 GitHub Actions 的 Ubuntu + Node 24 上跑；通过后才会考虑部署。当前 CI 全绿，唯一「失败」风险是 Pages 未启用时 deploy 被跳过（这是预期行为）。
+`npm run verify` 在 GitHub Actions 的 Ubuntu + Node 24 上跑；通过后才会考虑部署。当前自定义 workflow 全绿；另有 GitHub 的 `pages build and deployment`（branch 模式）也会绿，但它发布的是仓库根目录，不代表构建产物可用——看线上是否空白，先查入口脚本。
 
 ---
 
@@ -323,14 +324,32 @@ python scripts/prepare-video-frames.py
 
 ## 8. 部署与发布
 
-### 8.1 一次性启用 Pages
+### 8.1 Pages 源必须是 GitHub Actions
 
 1. 打开 `https://github.com/francisco939/LearningRoom/settings/pages`。
-2. **Source** 选 **GitHub Actions**。
-3. 重新运行 `Deploy to GitHub Pages`（或再 push 一次）。
+2. **Build and deployment → Source** 选 **GitHub Actions**（不是 `Deploy from a branch`）。
+3. 保存后重新运行 `Deploy to GitHub Pages`（或再 push 一次）。
 4. 等 deploy 任务变绿，访问 `https://francisco939.github.io/LearningRoom/`。
 
-**当前状态**：Pages 未启用，线上是 404。CI #7 成功但 deploy 跳过，这是预期行为。
+**当前状态（2026-11-08）**：Pages 已开启，但 Source 是 `Deploy from a branch`（`main` / root）。所以：
+
+- `pages build and deployment` 成功发布的是仓库根目录的 `index.html`；
+- 该 HTML 的入口是 `<script src="/src/main.tsx">`，浏览器 404；
+- 页面只有 `<div id="root"></div>`，看起来就是全黑。
+
+**30 秒验证**：
+
+```bash
+curl -s https://francisco939.github.io/LearningRoom/ | findstr "src/main.tsx"
+# 有输出 → 还在 branch 模式，必须改 Source
+
+curl -s https://francisco939.github.io/LearningRoom/ | findstr "/LearningRoom/assets/"
+# 有输出 → GitHub Actions 构建产物已生效
+```
+
+浏览器里也可以 `view-source:` 看入口；正确入口应为 `/LearningRoom/assets/index-*.js`。
+
+**切换后如果还是空白**：用无痕窗口 / 强制刷新（Ctrl+Shift+R）；之前 branch 版本没有注册 SW，一般不需要清 Service Worker。
 
 ### 8.2 发布流程
 
@@ -356,7 +375,7 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 
 | 优先级 | 问题 | 影响 | 建议 |
 | --- | --- | --- | --- |
-| **P0** | GitHub Pages 未启用 | 线上 404 | owner 在 Settings → Pages 启用 |
+| **P0** | Pages Source 是 `Deploy from a branch` | 线上空白：发布的是根目录 dev HTML，`/src/main.tsx` 404 | owner 在 Settings → Pages 改成 **GitHub Actions**，重跑 deploy |
 | P1 | 没有 E2E；hooks 未测 | 巡查/计时回归只能手测 | 加 Playwright：1 分钟 session + 强制巡查 |
 | P1 | 移动端未在真机审过 | 小屏可能挤压/遮挡 | 390×844、iPhone Safari、横屏各跑一遍 |
 | P1 | 无 ErrorBoundary | 运行时异常白屏 | 加 React ErrorBoundary + 上报 |
@@ -384,9 +403,11 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 
 ### P0 — 让线上可用（0.5 天）
 
-- 启用 Pages，确认 deploy 成功。
+- 把 Pages 的 Source 从 `Deploy from a branch` 改成 **GitHub Actions**。
+- 重跑 `Deploy to GitHub Pages`，确认 deploy 成功。
+- 确认页面入口是 `/LearningRoom/assets/index-*.js`，不是 `/src/main.tsx`。
 - 打开线上地址，跑一遍手工清单（至少计时/巡查/刷新/离线）。
-- 把线上 URL 写回 README 的「状态」。
+- 把线上 URL 与状态写回 README。
 
 ### P1 — 质量补强（2–3 天）
 

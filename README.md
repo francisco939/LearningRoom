@@ -6,7 +6,7 @@
 
 浏览器打开即用，无需登录；记录只保存在本机。
 
-**状态**：单人本地 MVP 已完成，可构建、可部署。线上 GitHub Pages **尚未启用**（见「部署」）。
+**状态**：单人本地 MVP 已完成，可构建、可部署。线上 GitHub Pages 已开启，但当前 **Source 指向 `main` 分支根目录**，打开是空白页；需要改成 **GitHub Actions** 才会发布构建产物（见「部署」）。
 
 [接手项目？先读交接文档 →](docs/HANDOFF.md) · [玩法与状态机](docs/product.md) · [素材与许可](ASSETS.md)
 
@@ -125,15 +125,23 @@ scripts/          素材处理脚本（肖像/音频/图标、视频切帧抠像
 
 仓库自带 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)：push 到 `main` 后跑 `npm run verify`，然后检查 Pages 是否启用；启用则发布，未启用则跳过 deploy 并输出提示。
 
-**首次使用需手动启用一次**：
+**必须选择 GitHub Actions，不能选 “Deploy from a branch”**：
 
-1. 打开仓库 **Settings → Pages**。
-2. **Source** 选择 **GitHub Actions**。
-3. 重新运行 `Deploy to GitHub Pages` 工作流（或再 push 一次）。
+1. 打开仓库 **Settings → Pages → Build and deployment**。
+2. **Source** 选择 **GitHub Actions**（不是 `Deploy from a branch`）。
+3. 保存后打开 **Actions → Deploy to GitHub Pages → Run workflow**，或再 push 一次。
+4. 等 deploy 任务变绿，访问 `https://francisco939.github.io/LearningRoom/`。
 
 目标地址：`https://francisco939.github.io/LearningRoom/`
 
-> 当前 Pages 未启用，线上是 404；CI 构建是绿的。Vite 在 CI 中会自动把 `base` 设为 `/LearningRoom/`。
+**如果打开是空白页**：
+
+- 查看网页源码，若入口还是 `<script src="/src/main.tsx">`，说明 Pages 正在发布仓库根目录（branch 模式），不是构建产物。
+- 在 **Settings → Pages** 把 Source 改成 **GitHub Actions**，重跑 `Deploy to GitHub Pages`。
+- 构建产物的入口应该是 `/LearningRoom/assets/index-*.js`，不是 `/src/main.tsx`。
+- 改完后用无痕窗口打开，或强制刷新，避免旧缓存。
+
+> Vite 在 CI 中会自动把 `base` 设为 `/LearningRoom/`；本地构建仍然是 `/`。
 
 ## 素材与许可
 
