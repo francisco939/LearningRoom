@@ -12,7 +12,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png', 'supervisor/maodie.webp', 'audio/rain.m4a'],
+      includeAssets: ['favicon.ico', 'icons/*.png', 'supervisor/maodie.webp', 'audio/rain.m4a'],
       manifest: {
         name: 'LearningRoom · 耄耋自习室',
         short_name: '耄耋自习室',

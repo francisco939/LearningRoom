@@ -32,6 +32,9 @@ PUBLIC = ROOT / "public"
 CAT_SRC = SRC / "cat-user.jpg"
 CAT_OUT = PUBLIC / "supervisor" / "maodie.webp"
 
+# 应用图标源图：作者提供的橘猫照片（601×401，豆包 AI 生成）。
+ICON_SRC = SRC / "icon-cat.png"
+
 RAIN_URL = "https://cdn.freesound.org/previews/270/270349_3366749-hq.mp3"
 RAIN_SRC = SRC / "rain.mp3"
 RAIN_OUT = PUBLIC / "audio" / "rain.m4a"
@@ -237,18 +240,39 @@ def draw_cat_icon(canvas: int = 1024, maskable: bool = False) -> Image.Image:
 
 
 def prepare_icons() -> None:
-    PUBLIC.joinpath("icons").mkdir(parents=True, exist_ok=True)
-    master = draw_cat_icon(1024, maskable=False)
-    master.resize((512, 512), Image.LANCZOS).save(PUBLIC / "icons" / "icon-512.png")
-    master.resize((192, 192), Image.LANCZOS).save(PUBLIC / "icons" / "icon-192.png")
+    if not ICON_SRC.exists():
+        print(f"[skip] 图标源图不存在：{ICON_SRC}（沿用仓库现有图标）")
+        return
 
-    maskable = draw_cat_icon(1024, maskable=True)
-    maskable.resize((512, 512), Image.LANCZOS).save(PUBLIC / "icons" / "maskable-512.png")
+    icons = PUBLIC / "icons"
+    icons.mkdir(parents=True, exist_ok=True)
 
-    for name in ("icon-192.png", "icon-512.png", "maskable-512.png"):
-        path = PUBLIC / "icons" / name
+    image = Image.open(ICON_SRC).convert("RGB")
+    # 601×401 原图：裁掉底部水印，保留眯眼、白嘴、吐舌。
+    portrait = image.crop((100, 0, 481, 381))
+    portrait = ImageEnhance.Contrast(portrait).enhance(1.03)
+    portrait = ImageEnhance.Sharpness(portrait).enhance(1.08)
+    master = portrait.resize((512, 512), Image.LANCZOS)
+    master.save(icons / "icon-512.png", optimize=True)
+    master.resize((192, 192), Image.LANCZOS).save(icons / "icon-192.png", optimize=True)
+    master.resize((180, 180), Image.LANCZOS).save(icons / "apple-touch-icon.png", optimize=True)
+    master.resize((32, 32), Image.LANCZOS).save(icons / "favicon-32.png", optimize=True)
+    master.save(PUBLIC / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
+
+    maskable = Image.new("RGB", (512, 512), (20, 16, 13))
+    maskable.paste(master.resize((410, 410), Image.LANCZOS), (51, 51))
+    maskable.save(icons / "maskable-512.png", optimize=True)
+
+    for path in (
+        PUBLIC / "favicon.ico",
+        icons / "favicon-32.png",
+        icons / "apple-touch-icon.png",
+        icons / "icon-192.png",
+        icons / "icon-512.png",
+        icons / "maskable-512.png",
+    ):
         with Image.open(path) as check:
-            print(f"[out ] {path} {check.size} {path.stat().st_size} bytes")
+            print(f"[out ] {path.relative_to(ROOT)} {check.size} {path.stat().st_size} bytes")
 
 
 def measure_loudness(ffmpeg: str, path: Path) -> dict[str, str]:
@@ -368,6 +392,9 @@ def report() -> None:
     for path in (
         CAT_OUT,
         RAIN_OUT,
+        PUBLIC / "favicon.ico",
+        PUBLIC / "icons" / "favicon-32.png",
+        PUBLIC / "icons" / "apple-touch-icon.png",
         PUBLIC / "icons" / "icon-192.png",
         PUBLIC / "icons" / "icon-512.png",
         PUBLIC / "icons" / "maskable-512.png",

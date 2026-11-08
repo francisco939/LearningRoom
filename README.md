@@ -93,7 +93,7 @@ npm run preview  # 预览生产构建
 - 音频：HTMLAudioElement 雨声/哈气 + Web Audio 提示音
 - 测试：Vitest + jsdom
 
-首屏 JS 约 **97 KB gzip**；PWA 预缓存约 **2.56 MB**（含三张高清场景、帧动画、音频与字体）。
+首屏 JS 约 **97 KB gzip**；PWA 预缓存约 **3.2 MB**（含三张高清场景、帧动画、猫像图标、音频与字体）。
 
 ## 工程结构
 
@@ -159,7 +159,8 @@ scripts/          素材处理脚本（肖像/音频/图标、视频切帧抠像
 | 三张高清场景 | 项目作者用 Seedream 生成 | 作者保留权利，仅用于本项目 |
 | 雨声 | seth-m / Freesound 270349 | CC0 1.0 |
 | 哈气声 | Zabuhailo / Wikimedia Commons | CC0 1.0 |
-| 场景/猫脸 SVG、图标 | 本项目原创 | MIT |
+| 场景/猫脸 SVG | 本项目原创 | MIT |
+| 应用图标（favicon/PWA） | 作者提供的猫照片（豆包 AI 生成） | 作者保留权利，仅用于本项目 |
 | Fraunces / Manrope 字体 | Fontsource | SIL OFL 1.1 |
 
 完整署名、处理方式与备用素材见 [ASSETS.md](ASSETS.md)。

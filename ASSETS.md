@@ -82,12 +82,12 @@ ffmpeg -y -i "assets-src/rain_comp.wav" -af "$FILTER2" -ac 1 -ar 44100 -c:a aac 
 | 项 | 内容 |
 | --- | --- |
 | 用途 | PWA 图标、favicon、apple-touch-icon、maskable 图标 |
-| 作者 | 本项目原创（Pillow 绘制） |
-| 许可 | MIT（与代码相同） |
-| 产物 | `public/icons/icon-192.png`（12,380 bytes）<br>`public/icons/icon-512.png`（28,939 bytes）<br>`public/icons/maskable-512.png`（23,021 bytes） |
+| 来源 | 项目作者提供的橘猫照片（豆包 AI 生成），裁成方形头像 |
+| 许可 | 作者保留权利，仅用于本项目；**不随 MIT 代码许可** |
+| 产物 | `public/favicon.ico`（16/32/48）<br>`public/icons/favicon-32.png`<br>`public/icons/icon-192.png`<br>`public/icons/icon-512.png`<br>`public/icons/apple-touch-icon.png`（180×180）<br>`public/icons/maskable-512.png` |
 
-风格：深色底 `#14100d`，暖橙 `#e3a45c` 圆头、深色耳朵、眯眼、白嘴与胡须；无文字。
-maskable 版本把内容缩到约 70%，四周留出安全边距，背景铺满。
+处理：从 `assets-src/icon-cat.png` 取 `(100, 0, 481, 381)` 方形裁切，保留眯眼、白嘴和吐舌，去掉底部水印，缩放到 512。
+maskable 版本把头像缩到 410×410，居中放在 `#14100d` 背景上，留出安全边距。
 
 ## 4. 场景与猫脸插画
 

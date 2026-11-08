@@ -11,4 +11,5 @@ assets-src/
 .models/
 .pip-cache/
 .tmp/
+.workbuddy/
 playwright-report/

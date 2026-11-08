@@ -321,7 +321,8 @@ python scripts/prepare-video-frames.py
 ### 7.5 字体 / 图标
 
 - `@fontsource-variable/fraunces` 与 `manrope`，OFL；中文回退系统宋体/苹方。
-- PWA 图标是 Pillow 画的原创 PNG（192/512/maskable）。
+- 应用图标来自作者提供的猫照片（`assets-src/icon-cat.png`），处理成 `favicon.ico`、32/192/512 PNG、180 apple-touch、410 安全区的 maskable；**不随 MIT 代码许可**，来源见 [ASSETS.md](../ASSETS.md)。
+- `scripts/prepare-assets.py` 的 `prepare_icons()` 会从该源图重生成上述图标；源图缺失时跳过，不会用旧矢量图覆盖。
 - `public/og.webp` 1200×630，用于社交分享。
 
 ---
@@ -475,7 +476,7 @@ push 后 Actions 自动跑 verify 并部署。Vite 使用相对 `base: './'`，�
 部署            .github/workflows/deploy.yml
 ```
 
-**最后一次验证**：`npm run verify` 通过；82 tests；JS 97.6KB gzip；PWA 预缓存约 2.56MB。线上 `https://www.learningroom.dpdns.org/` 已于 2026-11-08 打开验证，入口 `./assets/index-*.js` 正常、首屏与引导可见。
+**最后一次验证**：`npm run verify` 通过；82 tests；JS 97.6KB gzip；PWA 预缓存约 3.2MB。线上 `https://www.learningroom.dpdns.org/` 已于 2026-11-08 打开验证，入口 `./assets/index-*.js` 正常、首屏与引导可见。
 
 ---
 
