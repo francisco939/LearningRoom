@@ -14,7 +14,7 @@
    git clone https://github.com/francisco939/LearningRoom.git
    cd LearningRoom
    npm install
-   npm run verify     # lint + 80 个单测 + tsc + build
+   npm run verify     # lint + 82 个单测 + tsc + build
    npm run dev
    ```
 
@@ -182,7 +182,7 @@ IndexedDB（`idb-keyval`）：`lr-cat-image` 存用户上传的督学图（最�
 | `npm run build` | `tsc --noEmit && vite build` |
 | `npm run preview` | 预览生产构建 |
 | `npm run lint` | ESLint 9（含 react-hooks 严格规则） |
-| `npm run test` | Vitest（6 个文件，80 个用例） |
+| `npm run test` | Vitest（7 个文件，82 个用例） |
 | `npm run verify` | lint + test + build，提交前必跑 |
 
 ### 5.2 Windows / DSH 沙箱的坑（重要）
@@ -228,6 +228,7 @@ src/test/progress.test.ts      23 例：鱼干公式、04:00 切日、连续天�
 src/test/session.test.ts        7 例：buildDraftSession 状态/时长映射
 src/test/settings.test.ts       4 例：catName / supervisionEnabled 迁移与边界
 src/test/portrait.test.tsx      2 例：相框名字显示与空值回退
+src/test/timerHint.test.tsx     2 例：10 秒自动关闭、点击关闭并打开设置
 ```
 
 **没覆盖的**：React hooks（`useSupervisor` / `useTimerEngine`）、帧播放、音频、PWA、真实浏览器布局、移动端。改巡查 hook 时请补测试或至少手工跑清单。
@@ -467,7 +468,7 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 部署            .github/workflows/deploy.yml
 ```
 
-**最后一次验证**：`npm run verify` 通过；80 tests；JS 97.4KB gzip；PWA 预缓存约 2.56MB。线上 `https://francisco939.github.io/LearningRoom/` 已于 2026-11-08 打开验证，入口 `/LearningRoom/assets/index-*.js` 正常、首屏与引导可见。
+**最后一次验证**：`npm run verify` 通过；82 tests；JS 97.6KB gzip；PWA 预缓存约 2.56MB。线上 `https://francisco939.github.io/LearningRoom/` 已于 2026-11-08 打开验证，入口 `/LearningRoom/assets/index-*.js` 正常、首屏与引导可见。
 
 ---
 

@@ -753,6 +753,20 @@ button {
   pointer-events: none;
 }
 
+@keyframes hint-fade {
+  0%,
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.hint-fade {
+  animation: hint-fade 10s ease forwards;
+}
+
 .timer-digits {
   font-variant-numeric: lining-nums tabular-nums;
   font-feature-settings:

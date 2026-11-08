@@ -56,7 +56,7 @@ npm run dev
 打开 `http://localhost:5173`。
 
 ```bash
-npm run test     # 单元测试（80 个用例）
+npm run test     # 单元测试（82 个用例）
 npm run lint     # ESLint
 npm run build    # 类型检查 + 生产构建
 npm run verify   # lint + test + build（提交前跑）

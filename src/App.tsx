@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { SlidersHorizontal } from 'lucide-react'
 import { SceneStage } from '@/components/scene/SceneStage'
 import { TopBar } from '@/components/hud/TopBar'
 import { TimerDisplay } from '@/components/timer/TimerDisplay'
+import { TimerHint } from '@/components/timer/TimerHint'
 import { TimerRing } from '@/components/timer/TimerRing'
 import { TimerControls } from '@/components/timer/TimerControls'
 import { ModeSwitch } from '@/components/timer/ModeSwitch'
@@ -127,15 +127,7 @@ export default function App() {
                 <ModeSwitch />
               </div>
               {timer.status === 'idle' && timer.mode !== 'stopwatch' && (
-                <button
-                  type="button"
-                  onClick={() => setPanel('settings')}
-                  aria-label="打开设置修改时长"
-                  className="mt-4 flex items-center gap-1.5 rounded-full border border-paper/10 bg-black/25 px-3 py-1.5 text-[13px] tracking-[0.04em] text-paper/55 backdrop-blur-sm transition hover:border-amber/30 hover:text-paper/85"
-                >
-                  <SlidersHorizontal size={13} />
-                  时间在「设置」里改 · 未开始时自动同步
-                </button>
+                <TimerHint onOpenSettings={() => setPanel('settings')} />
               )}
             </div>
           </div>
