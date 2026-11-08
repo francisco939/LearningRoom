@@ -257,8 +257,9 @@ export function totalFocusMs(state: TimerState, now: number): number {
 }
 
 export function remainingSec(state: TimerState, now: number): number {
-  if (state.mode === 'stopwatch' && state.phase === 'focus') {
-    return Math.floor(totalFocusMs(state, now) / 1000)
+  if (state.mode === 'stopwatch') {
+    if (state.phase === 'idle') return 0
+    if (state.phase === 'focus') return Math.floor(totalFocusMs(state, now) / 1000)
   }
   if (state.phase === 'idle') return state.focusSec
   if (state.phaseEndsAt === null) return 0

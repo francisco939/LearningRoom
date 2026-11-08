@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { SlidersHorizontal } from 'lucide-react'
 import { SceneStage } from '@/components/scene/SceneStage'
 import { TopBar } from '@/components/hud/TopBar'
 import { TimerDisplay } from '@/components/timer/TimerDisplay'
@@ -37,6 +38,7 @@ export default function App() {
   const settings = useSettings((s) => s.settings)
   const progress = useProgress((s) => s.progress)
   const timer = useSession((s) => s.timer)
+  const resetSession = useSession((s) => s.resetSession)
   const patrol = useSession((s) => s.patrol)
   const peek = useSession((s) => s.peek)
   const result = useSession((s) => s.result)
@@ -52,6 +54,21 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.motion = reduced ? 'on' : 'off'
   }, [reduced])
+
+  // 未开始时，设置里的时长/模式变化要立即反映到主界面；开始后不打断当前计时。
+  useEffect(() => {
+    if (timer.status !== 'idle') return
+    resetSession()
+  }, [
+    settings.mode,
+    settings.focusMin,
+    settings.breakMin,
+    settings.rounds,
+    settings.autoStartBreak,
+    settings.autoStartFocus,
+    timer.status,
+    resetSession,
+  ])
 
   useEffect(() => {
     if (!import.meta.env.DEV) return
@@ -107,6 +124,17 @@ export default function App() {
               <div className="mt-7">
                 <ModeSwitch />
               </div>
+              {timer.status === 'idle' && timer.mode !== 'stopwatch' && (
+                <button
+                  type="button"
+                  onClick={() => setPanel('settings')}
+                  aria-label="打开设置修改时长"
+                  className="mt-4 flex items-center gap-1.5 rounded-full border border-paper/10 bg-black/25 px-3 py-1.5 text-[13px] tracking-[0.04em] text-paper/55 backdrop-blur-sm transition hover:border-amber/30 hover:text-paper/85"
+                >
+                  <SlidersHorizontal size={13} />
+                  时间在「设置」里改 · 未开始时自动同步
+                </button>
+              )}
             </div>
           </div>
         </main>

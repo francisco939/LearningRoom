@@ -286,6 +286,12 @@ describe('timer: abort', () => {
 })
 
 describe('timer: stopwatch', () => {
+  it('idle 时显示 00:00，而不是配置的专注时长', () => {
+    const state = makeTimer({ mode: 'stopwatch' })
+    expect(state.phase).toBe('idle')
+    expect(remainingSec(state, T0)).toBe(0)
+  })
+
   it('running 时 remainingSec 是累计秒，END 结算累计时长', () => {
     let state = start(makeTimer({ mode: 'stopwatch' }))
 

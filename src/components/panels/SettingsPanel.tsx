@@ -70,7 +70,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
             onChange={(checked) => update({ autoStartFocus: checked })}
           />
           <p className="text-[12px] leading-relaxed text-paper/35">
-            修改时长只影响下一场；正在进行的计时不会被打断。
+            未开始时修改会立即同步到主界面；开始后只影响下一场，不会打断当前计时。
           </p>
         </Section>
 
