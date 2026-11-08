@@ -6,7 +6,7 @@
 
 浏览器打开即用，无需登录；记录只保存在本机。
 
-**状态**：单人本地 MVP 已完成，线上 GitHub Pages 已部署并验证可访问：`https://francisco939.github.io/LearningRoom/`。首次打开如果仍是旧空白页，用无痕窗口或 Ctrl+Shift+R 强制刷新。
+**状态**：单人本地 MVP 已完成，线上已部署并验证可访问：`https://www.learningroom.dpdns.org/`（GitHub Pages + 自定义域名；`github.io/LearningRoom/` 会跳转到这里）。首次打开如果仍是旧空白页，用无痕窗口或 Ctrl+Shift+R 强制刷新。
 
 [接手项目？先读交接文档 →](docs/HANDOFF.md) · [玩法与状态机](docs/product.md) · [素材与许可](ASSETS.md)
 
@@ -133,18 +133,21 @@ scripts/          素材处理脚本（肖像/音频/图标、视频切帧抠像
 1. 打开仓库 **Settings → Pages → Build and deployment**。
 2. **Source** 选择 **GitHub Actions**（不是 `Deploy from a branch`）。
 3. 保存后打开 **Actions → Deploy to GitHub Pages → Run workflow**，或再 push 一次。
-4. 等 deploy 任务变绿，访问 `https://francisco939.github.io/LearningRoom/`。
+4. 等 deploy 任务变绿，访问 `https://www.learningroom.dpdns.org/`。
 
-目标地址：`https://francisco939.github.io/LearningRoom/`
+**自定义域名**：`www.learningroom.dpdns.org`
+
+- 根目录 `CNAME` 与 `public/CNAME` 各一份（后者会被 Vite 复制到 `dist/`，随 Actions 发布）。
+- DNS 加一条 `CNAME`：`www` → `francisco939.github.io`。
+- Settings → Pages → Custom domain 填 `www.learningroom.dpdns.org`，等证书签发后勾选 Enforce HTTPS。
+- Vite 使用相对 `base: './'`，同一份构建同时兼容自定义域名根路径和 `github.io/LearningRoom/` 子路径。
 
 **如果打开是空白页**（通常发生在刚切换 Source、或浏览器还缓存着旧 HTML）：
 
 - 查看网页源码，若入口还是 `<script src="/src/main.tsx">`，说明 Pages 正在发布仓库根目录（branch 模式），不是构建产物。
 - 在 **Settings → Pages** 确认 Source 是 **GitHub Actions**，重跑 `Deploy to GitHub Pages`。
-- 构建产物的入口应该是 `/LearningRoom/assets/index-*.js`，不是 `/src/main.tsx`。
+- 构建产物的入口应该是 `./assets/index-*.js` 或 `/assets/index-*.js`，不是 `/src/main.tsx`。
 - 用无痕窗口打开，或 Ctrl+Shift+R 强制刷新；GitHub Pages 的 HTML 缓存约 10 分钟。
-
-> Vite 在 CI 中会自动把 `base` 设为 `/LearningRoom/`；本地构建仍然是 `/`。
 
 ## 素材与许可
 

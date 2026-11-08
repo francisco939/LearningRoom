@@ -32,7 +32,7 @@
 | --- | --- |
 | 仓库 | https://github.com/francisco939/LearningRoom |
 | 默认分支 | `main` |
-| 线上地址 | `https://francisco939.github.io/LearningRoom/`（**已部署并验证**，2026-11-08；首次打开如空白请强刷） |
+| 线上地址 | `https://www.learningroom.dpdns.org/`（**已部署并验证**，2026-11-08；`github.io/LearningRoom/` 会跳转；首次打开如空白请强刷） |
 | CI | `.github/workflows/deploy.yml`（自定义构建/部署）成功；Pages Source 已改为 GitHub Actions，旧的 `pages build and deployment` 不再作为发布源 |
 | 代码许可 | MIT（`LICENSE`） |
 | 素材许可 | 单独说明，见 [ASSETS.md](../ASSETS.md)；**不全是 MIT** |
@@ -83,7 +83,7 @@
 | 图标 | `lucide-react` |
 | 测试 | Vitest 4 + jsdom |
 
-无路由、无 SSR、无 API 层。`base` 在 CI 中自动设为 `/LearningRoom/`。
+无路由、无 SSR、无 API 层。Vite 使用相对 `base: './'`，同时兼容自定义域名根路径和 `github.io/LearningRoom/` 子路径。
 
 ### 3.2 数据流
 
@@ -138,10 +138,10 @@ IndexedDB（`idb-keyval`）：`lr-cat-image` 存用户上传的督学图（最�
 ### 3.6 部署
 
 - `push main` → Actions：`npm ci` → `npm run verify` → 检查 Pages 是否启用 → 上传 `dist` 工件 → 若启用则 `deploy-pages`。
-- `vite.config.ts`：`base = process.env.GITHUB_ACTIONS ? '/LearningRoom/' : '/'`。
+- `vite.config.ts`：`base: './'`；`public/CNAME` 会被复制到 `dist/CNAME`，随 artifact 发布。
 - 未启用 Pages 时，构建任务仍成功，`deploy` 跳过，并输出 notice。
 - **如果 Pages 的 Source 还是 “Deploy from a branch”**，GitHub 会另跑一条 `pages build and deployment`，发布 `main` 根目录；它和自定义 `deploy-pages` 是两条链路，页面最终看到的是 branch 的原始 `index.html`（入口 `/src/main.tsx`），因此空白。必须把 Source 改成 GitHub Actions。
-- 没有自定义域名、没有环境变量、没有 secrets。
+- 自定义域名 `www.learningroom.dpdns.org`；DNS 为 `CNAME www -> francisco939.github.io`；没有环境变量、没有 secrets。
 
 ---
 
@@ -213,7 +213,7 @@ IndexedDB（`idb-keyval`）：`lr-cat-image` 存用户上传的督学图（最�
 
 - 无 `.env`、无后端地址；所有 API 都是本地静态资源。
 - `npm run dev` 端口被占用时 Vite 会自动换端口（曾出现 5174）。
-- 生产 base 只在 `GITHUB_ACTIONS=true` 时变为 `/LearningRoom/`；本地预览是 `/`。
+- 生产与本地都使用相对 `base: './'`；页面在根路径或 `/LearningRoom/` 子路径下都能正确解析资源。
 
 ---
 
@@ -333,7 +333,7 @@ python scripts/prepare-video-frames.py
 1. 打开 `https://github.com/francisco939/LearningRoom/settings/pages`。
 2. **Build and deployment → Source** 选 **GitHub Actions**（不是 `Deploy from a branch`）。
 3. 保存后重新运行 `Deploy to GitHub Pages`（或再 push 一次）。
-4. 等 deploy 任务变绿，访问 `https://francisco939.github.io/LearningRoom/`。
+4. 等 deploy 任务变绿，访问 `https://www.learningroom.dpdns.org/`。
 
 **当前状态（2026-11-08）**：Source 已切换为 **GitHub Actions**，`Deploy to GitHub Pages` 部署成功，线上已验证可打开。下面保留故障排查，供重建或换仓库时使用。
 
@@ -346,14 +346,21 @@ python scripts/prepare-video-frames.py
 **30 秒验证**：
 
 ```bash
-curl -s https://francisco939.github.io/LearningRoom/ | findstr "src/main.tsx"
+curl -s https://www.learningroom.dpdns.org/ | findstr "src/main.tsx"
 # 有输出 → 还在 branch 模式，必须改 Source
 
-curl -s https://francisco939.github.io/LearningRoom/ | findstr "/LearningRoom/assets/"
-# 有输出 → GitHub Actions 构建产物已生效
+curl -s https://www.learningroom.dpdns.org/ | findstr "./assets/"
+# 有输出 → GitHub Actions 构建产物已生效（相对 base）
 ```
 
-浏览器里也可以 `view-source:` 看入口；正确入口应为 `/LearningRoom/assets/index-*.js`。
+浏览器里也可以 `view-source:` 看入口；正确入口应为 `./assets/index-*.js`。
+
+**自定义域名 / CNAME**：
+
+- 仓库根目录和 `public/CNAME` 各有一份 `www.learningroom.dpdns.org`；后者保证它进入 `dist/` 和 Pages artifact。
+- DNS：`CNAME www -> francisco939.github.io`。
+- Pages → Custom domain 填 `www.learningroom.dpdns.org`；证书签发后勾选 Enforce HTTPS。
+- `base: './'` 让同一份构建同时适配根域名和 `github.io/LearningRoom/`。
 
 **切换后如果还是空白**：用无痕窗口 / 强制刷新（Ctrl+Shift+R）。GitHub Pages 的 HTML 缓存约 10 分钟；之前 branch 版本没有注册 SW，一般不需要清 Service Worker。
 
@@ -366,14 +373,14 @@ git commit -m "feat: ..."
 git push
 ```
 
-push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/LearningRoom/` base。
+push 后 Actions 自动跑 verify 并部署。Vite 使用相对 `base: './'`，自定义域名根路径和 `github.io/LearningRoom/` 都能正常加载资源。
 
 ### 8.3 缓存/PWA
 
 - `vite-plugin-pwa` 使用 `generateSW` + `autoUpdate`；用户下次打开会拿新版本。
 - 预缓存包含 `json`（sprite manifest）、`webp`、`m4a`；如果加新资源类型，记得改 `workbox.globPatterns`。
-- `start_url` / `scope` 是相对路径，兼容 `/LearningRoom/` 子路径。
-- 没有自定义域名；换域名要同时改 `base`、Pages 设置、OG/分享链接。
+- `start_url` / `scope` 是相对路径，兼容根域名和 `/LearningRoom/` 子路径。
+- 自定义域名已配置；换域名要同时改 `CNAME`、`public/CNAME`、DNS、Pages 设置和 OG/分享链接。
 
 ---
 
@@ -404,7 +411,7 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 - `PeekVisual` 的 JSON 字段：`fps/cell/cols/count` 与 sprite 实际网格必须一致。
 - `vite.config.ts` 的 `globPatterns`：新增 `.json` 资源不要漏。
 - `hiss` 音效必须跟随 `settings.sound`，不要在 `PeekCat` 里无条件播放。
-- PWA base：本地 `/`、CI `/LearningRoom/`，不要硬编码 `/`。
+- PWA base：使用相对 `./`，不要硬编码 `/` 或 `/LearningRoom/`。
 
 ---
 
@@ -413,7 +420,7 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 ### P0 — 让线上可用（已完成 2026-11-08）
 
 - [x] Pages Source 改为 **GitHub Actions**，`Deploy to GitHub Pages` 部署成功。
-- [x] 页面入口是 `/LearningRoom/assets/index-*.js`，不是 `/src/main.tsx`。
+- [x] 页面入口是 `./assets/index-*.js`，不是 `/src/main.tsx`。
 - [x] 线上地址可打开，首屏与引导正常。
 - [ ] 在线上跑一遍手工清单（计时/巡查/刷新/离线），建议接手后第一件事补上。
 - [ ] 把线上验收结果补进 README 的「已知限制 / 路线图」。
@@ -468,7 +475,7 @@ push 后 Actions 自动跑 verify 并部署。Vite 在 CI 中自动使用 `/Lear
 部署            .github/workflows/deploy.yml
 ```
 
-**最后一次验证**：`npm run verify` 通过；82 tests；JS 97.6KB gzip；PWA 预缓存约 2.56MB。线上 `https://francisco939.github.io/LearningRoom/` 已于 2026-11-08 打开验证，入口 `/LearningRoom/assets/index-*.js` 正常、首屏与引导可见。
+**最后一次验证**：`npm run verify` 通过；82 tests；JS 97.6KB gzip；PWA 预缓存约 2.56MB。线上 `https://www.learningroom.dpdns.org/` 已于 2026-11-08 打开验证，入口 `./assets/index-*.js` 正常、首屏与引导可见。
 
 ---
 

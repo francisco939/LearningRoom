@@ -5,7 +5,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: process.env.GITHUB_ACTIONS ? '/LearningRoom/' : '/',
+  // 相对 base：同时兼容 github.io/LearningRoom/ 和自定义域名根路径。
+  base: './',
   plugins: [
     react(),
     tailwindcss(),
