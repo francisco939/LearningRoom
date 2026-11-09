@@ -12,7 +12,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icons/*.png', 'supervisor/maodie.webp', 'audio/rain.m4a'],
+      includeAssets: ['favicon.ico', 'icons/*.png', 'supervisor/maodie.webp'],
       manifest: {
         name: 'LearningRoom · 自习室',
         short_name: 'LearningRoom',
@@ -36,11 +36,19 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,m4a,json}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,json}'],
         globIgnores: ['gallery/**'],
         cleanupOutdatedCaches: true,
         navigateFallback: 'index.html',
         runtimeCaching: [
+          {
+            urlPattern: /\/audio\/.*\.m4a$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'ambience-audio',
+              expiration: { maxEntries: 8, maxAgeSeconds: 30 * 24 * 60 * 60 },
+            },
+          },
           {
             urlPattern: /\/gallery\/images\/.*\.webp$/,
             handler: 'CacheFirst',
