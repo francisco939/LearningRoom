@@ -1,5 +1,4 @@
 import type { Progress, Session, Settings } from './types'
-import { PURE_STUDY_ROOM } from './studyMode'
 
 export const KEYS = {
   settings: 'lr.settings.v1',
@@ -22,7 +21,8 @@ export const defaultSettings: Settings = {
   volume: 0.5,
   catName: '耄耋',
   hasCustomCat: false,
-  supervisionEnabled: !PURE_STUDY_ROOM,
+  supervisionEnabled: false,
+  cameraWatch: false,
   backgroundMode: 'room',
   galleryId: 'image-01',
   galleryRotateMin: 10,
@@ -76,7 +76,9 @@ export function loadSettings(): Settings {
     typeof merged.catName === 'string' && merged.catName.trim()
       ? merged.catName.trim().slice(0, 8)
       : defaultSettings.catName
-  merged.supervisionEnabled = !PURE_STUDY_ROOM && merged.supervisionEnabled !== false
+  merged.supervisionEnabled = merged.supervisionEnabled === true
+  merged.cameraWatch = merged.cameraWatch === true
+
   merged.backgroundMode = merged.backgroundMode === 'gallery' ? 'gallery' : 'room'
 
   // 首次升级到“房间场景默认”时，把之前默认的 gallery 迁移一次；
@@ -94,6 +96,18 @@ export function loadSettings(): Settings {
   merged.galleryRotateMin = clamp(Number(merged.galleryRotateMin), 0, 60, 10)
   merged.galleryShuffle = merged.galleryShuffle === true
   merged.ambienceId = typeof merged.ambienceId === 'string' ? merged.ambienceId : 'rain'
+
+  // 监督机制默认关闭：老用户升级后先关闭一次，之后开关选择仍会被尊重。
+  try {
+    if (!localStorage.getItem('lr.supervision-default-off.v1')) {
+      merged.supervisionEnabled = false
+      write(KEYS.settings, merged)
+      localStorage.setItem('lr.supervision-default-off.v1', '1')
+    }
+  } catch {
+    /* localStorage unavailable */
+  }
+
   return merged
 }
 

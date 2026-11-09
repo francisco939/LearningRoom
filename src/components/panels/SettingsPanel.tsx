@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Upload, Trash2, RotateCcw, AlertTriangle } from 'lucide-react'
 import { useSettings } from '@/store/useSettings'
 import { useProgress } from '@/store/useProgress'
@@ -9,7 +9,9 @@ import { ambience } from '@/lib/audio'
 import type { SupervisionMode } from '@/lib/types'
 import { Panel } from './Panel'
 import { cn } from '@/lib/cn'
-import { PURE_STUDY_ROOM } from '@/lib/studyMode'
+import { acquireCamera, CameraUnavailableError, createMotionGate, MOTION } from '@/lib/cameraPresence'
+import { probePermission, useCamera } from '@/store/useCamera'
+import type { CameraStatus } from '@/store/useCamera'
 
 interface SettingsPanelProps {
   open: boolean
@@ -32,6 +34,8 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
   const { image, error, save, remove } = useCatImage()
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmReset, setConfirmReset] = useState(false)
+  const cameraStatus = useCamera((s) => s.status)
+  const cameraError = useCamera((s) => s.error)
 
   return (
     <Panel open={open} onClose={onClose} title="设置" subtitle="所有数据只保存在这台设备上">
@@ -75,7 +79,6 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           </p>
         </Section>
 
-        {!PURE_STUDY_ROOM && (
         <Section title="耄耋的巡查">
           <Toggle
             label="启用耄耋监督"
@@ -115,11 +118,28 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           </div>
           <p className="text-[12px] leading-relaxed text-paper/35">
             {settings.supervisionEnabled
-              ? '耄耋只看你是否在场：切走标签页、查岗不应声会扣星；它不打开摄像头。'
+              ? '耄耋看你在不在：切走标签页、查岗不应声会扣星；是否用摄像头在下方单独开启。'
               : '纯自习模式：没有探头、查岗和扣星，计时、记录与场景照常。'}
           </p>
         </Section>
-        )}
+
+        <Section title="摄像头巡查">
+          <Toggle
+            label="查岗时用摄像头看你在不在"
+            checked={settings.cameraWatch}
+            onChange={(checked) => {
+              update({ cameraWatch: checked })
+              if (checked) void probePermission()
+              else useCamera.getState().reset()
+            }}
+          />
+          <CameraStatusRow status={cameraStatus} error={cameraError} />
+          {settings.cameraWatch && <CameraProbe />}
+          <p className="text-[12px] leading-relaxed text-paper/35">
+            只在耄耋查岗那几秒开启，检测画面里是否有人在动；画面在本机即时处理、不上传不留存。
+            若长时间一动不动可能被误判，可点「喵」手动回应。
+          </p>
+        </Section>
 
         <Section title="声音">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -169,7 +189,6 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           </label>
         </Section>
 
-        {!PURE_STUDY_ROOM && (
         <Section title="督学形象">
           <label className="block">
             <span className="text-[12px] tracking-wider text-paper/40">督学名字</span>
@@ -238,7 +257,6 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           </div>
 
         </Section>
-        )}
 
         <Section title="动效">
           <div className="flex gap-2">
@@ -388,5 +406,112 @@ function Toggle({
         />
       </span>
     </button>
+  )
+}
+
+function CameraStatusRow({ status, error }: { status: CameraStatus; error: string | null }) {
+  if (status === 'idle') return null
+  const map: Record<CameraStatus, { text: string; className: string }> = {
+    idle: { text: '', className: '' },
+    granted: { text: '已授权', className: 'bg-emerald-500/15 text-emerald-300' },
+    denied: { text: '被拒绝', className: 'bg-danger/15 text-danger' },
+    unsupported: { text: '不支持', className: 'bg-danger/15 text-danger' },
+    watching: { text: '摄像头运行中', className: 'bg-amber/15 text-amber' },
+  }
+  const info = map[status]
+  if (!info.text) return null
+  return (
+    <div className="flex flex-wrap items-start gap-x-2 gap-y-1 text-[12px]">
+      <span className={cn('rounded-full px-2 py-0.5', info.className)}>{info.text}</span>
+      {error && <span className="text-paper/40">{error}</span>}
+    </div>
+  )
+}
+
+function CameraProbe() {
+  const [running, setRunning] = useState(false)
+  const [label, setLabel] = useState<'still' | 'motion' | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const intervalRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current !== null) window.clearInterval(intervalRef.current)
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+    }
+  }, [])
+
+  const start = async () => {
+    setError(null)
+    setRunning(true)
+    try {
+      const cam = await acquireCamera()
+      streamRef.current = cam.stream
+      const video = videoRef.current
+      if (!video) return
+      video.srcObject = cam.stream
+      await video.play().catch(() => {})
+      const W = MOTION.frameWidth
+      const H = MOTION.frameHeight
+      const canvas = document.createElement('canvas')
+      canvas.width = W
+      canvas.height = H
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      const gate = createMotionGate({ settleFrames: 3 })
+      const sample = () => {
+        if (!ctx || video.readyState < 2) return
+        try {
+          ctx.drawImage(video, 0, 0, W, H)
+          const d = ctx.getImageData(0, 0, W, H).data
+          setLabel(gate.push(d) ? 'motion' : 'still')
+        } catch {
+          /* ignore */
+        }
+      }
+      intervalRef.current = window.setInterval(sample, MOTION.sampleIntervalMs)
+    } catch (err) {
+      setRunning(false)
+      setError(err instanceof CameraUnavailableError ? err.message : '无法打开摄像头')
+    }
+  }
+
+  const stop = () => {
+    if (intervalRef.current !== null) window.clearInterval(intervalRef.current)
+    intervalRef.current = null
+    streamRef.current?.getTracks().forEach((t) => t.stop())
+    streamRef.current = null
+    setRunning(false)
+    setLabel(null)
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => (running ? stop() : void start())}
+          className="inline-flex items-center gap-1.5 rounded-full border border-paper/15 px-3 py-1.5 text-[12px] text-paper/70 transition hover:bg-paper/10"
+        >
+          {running ? '停止测试' : '测试摄像头'}
+        </button>
+        {label && (
+          <span className={cn('text-[12px]', label === 'motion' ? 'text-emerald-300' : 'text-paper/45')}>
+            {label === 'motion' ? '检测到动静' : '画面静止'}
+          </span>
+        )}
+      </div>
+      {running && (
+        <video
+          ref={videoRef}
+          muted
+          playsInline
+          autoPlay
+          className="h-28 w-full rounded-xl border border-paper/10 bg-black/30 object-cover"
+        />
+      )}
+      {error && <p className="text-[12px] text-danger">{error}</p>}
+    </div>
   )
 }

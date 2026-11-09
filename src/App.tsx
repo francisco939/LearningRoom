@@ -23,6 +23,7 @@ import { useSettings } from '@/store/useSettings'
 import { useProgress } from '@/store/useProgress'
 import { useTimerEngine } from '@/hooks/useTimerEngine'
 import { useSupervisor } from '@/hooks/useSupervisor'
+import { useCameraWatch } from '@/hooks/useCameraWatch'
 import { useAmbience } from '@/hooks/useAmbience'
 import { useHotkeys } from '@/hooks/useHotkeys'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -33,7 +34,6 @@ import { usePresence } from '@/hooks/usePresence'
 import { useSync } from '@/hooks/useSync'
 import { progressRatio, remainingSec } from '@/lib/timer'
 import { sceneById, type SceneDef } from '@/data/scenes'
-import { PURE_STUDY_ROOM } from '@/lib/studyMode'
 
 type PanelId =
   | 'history'
@@ -59,6 +59,7 @@ function readAuthParams(): { kind: 'verify' | 'reset' | null; token: string | nu
 export default function App() {
   useTimerEngine()
   useSupervisor()
+  useCameraWatch()
   useAmbience()
 
   const settings = useSettings((s) => s.settings)
@@ -75,7 +76,7 @@ export default function App() {
   const presence = usePresence()
   const sync = useSync()
   const refreshAuth = useAuth((s) => s.refresh)
-  const supervisionEnabled = !PURE_STUDY_ROOM && settings.supervisionEnabled
+  const supervisionEnabled = settings.supervisionEnabled
 
   const [initialAuth] = useState(readAuthParams)
   const [panel, setPanel] = useState<PanelId>(() => (initialAuth.kind ? 'account' : null))

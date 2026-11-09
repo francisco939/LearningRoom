@@ -35,6 +35,9 @@ export const SUPERVISION_CONFIG: Record<SupervisionMode, SupervisionConfig> = {
 export const FIRST_PATROL_MIN_MS = 60_000
 export const FIRST_PATROL_MAX_MS = 120_000
 export const VIOLATION_COOLDOWN_MS = 30_000
+export const LEAVE_MS = 60_000
+export const LIGHT_PATROL_MS = 8_000
+export const LIGHT_WARN_MS = 1_200
 
 export function configFor(mode: SupervisionMode): SupervisionConfig {
   return SUPERVISION_CONFIG[mode]

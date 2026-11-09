@@ -4,6 +4,8 @@ import type { TimerState } from '@/lib/timer'
 import { createTimer, reduce } from '@/lib/timer'
 import { localRepository } from '@/lib/repository'
 import { nextCatMessage } from '@/data/catLines'
+import { advanceTrust, isTimeoutViolation } from '@/lib/trust'
+import { LEAVE_MS } from '@/lib/supervision'
 import type { SessionDraft } from '@/lib/session'
 import type { PeekAnchor } from '@/lib/peek'
 
@@ -19,17 +21,31 @@ export interface PeekState {
   at: number
 }
 
+export interface LightPatrolState {
+  deadline: number
+}
+
+export interface LeaveState {
+  until: number
+}
+
 export interface SessionResult {
   session: Session
   unlocked: AchievementId[]
 }
 
+type StampKind = ViolationKind | 'pardon'
+
 interface SessionStore {
   timer: TimerState
   patrol: PatrolState | null
+  lightPatrol: LightPatrolState | null
+  leave: LeaveState | null
+  checkinStreak: number
+  pardon: boolean
   peek: PeekState | null
   catMessage: CatMessage
-  stamp: { id: number; kind: ViolationKind } | null
+  stamp: { id: number; kind: StampKind } | null
   result: SessionResult | null
   start: (settings: Settings) => void
   pause: () => void
@@ -40,6 +56,10 @@ interface SessionStore {
   tick: (now: number) => void
   violation: (kind: ViolationKind) => void
   setPatrol: (deadline: number, anchor: PeekAnchor) => void
+  setLightPatrol: (deadline: number) => void
+  clearLightPatrol: () => void
+  takeLeave: () => void
+  returnEarly: () => void
   showPeek: (anchor: PeekAnchor, tone: PeekState['tone']) => void
   dismissPeek: () => void
   ackPatrol: () => void
@@ -88,6 +108,10 @@ let peekSeq = 0
 export const useSession = create<SessionStore>((set, get) => ({
   timer: restoreTimer(readSettingsSnapshot()),
   patrol: null,
+  lightPatrol: null,
+  leave: null,
+  checkinStreak: 0,
+  pardon: false,
   peek: null,
   catMessage: nextCatMessage('idle'),
   stamp: null,
@@ -98,6 +122,10 @@ export const useSession = create<SessionStore>((set, get) => ({
     set({
       timer,
       patrol: null,
+      lightPatrol: null,
+      leave: null,
+      checkinStreak: 0,
+      pardon: false,
       peek: null,
       result: null,
       stamp: null,
@@ -108,7 +136,7 @@ export const useSession = create<SessionStore>((set, get) => ({
 
   pause: () => {
     const timer = reduce(get().timer, { type: 'PAUSE', now: Date.now() })
-    set({ timer, patrol: null, peek: null })
+    set({ timer, patrol: null, lightPatrol: null, peek: null })
     get().persist()
   },
 
@@ -120,19 +148,19 @@ export const useSession = create<SessionStore>((set, get) => ({
 
   skip: () => {
     const timer = reduce(get().timer, { type: 'SKIP', now: Date.now() })
-    set({ timer, patrol: null, peek: null })
+    set({ timer, patrol: null, lightPatrol: null, peek: null })
     get().persist()
   },
 
   end: () => {
     const timer = reduce(get().timer, { type: 'END', now: Date.now() })
-    set({ timer, patrol: null, peek: null })
+    set({ timer, patrol: null, lightPatrol: null, peek: null })
     get().persist()
   },
 
   abort: () => {
     const timer = reduce(get().timer, { type: 'ABORT', now: Date.now() })
-    set({ timer, patrol: null, peek: null })
+    set({ timer, patrol: null, lightPatrol: null, peek: null })
     get().persist()
   },
 
@@ -144,6 +172,8 @@ export const useSession = create<SessionStore>((set, get) => ({
     if (prev.status === 'running' && timer.status === 'finished') {
       set({
         patrol: null,
+        lightPatrol: null,
+        leave: null,
         peek: null,
         catMessage: nextCatMessage(timer.failureReason === 'stars' ? 'fail' : 'complete'),
       })
@@ -154,9 +184,23 @@ export const useSession = create<SessionStore>((set, get) => ({
     const before = get().timer
     const timer = reduce(before, { type: 'VIOLATION', now: Date.now(), kind })
     if (timer === before) return
+    // 免罚只挡「查岗超时」类，且只在真会扣星时才消耗。
+    if (get().pardon && isTimeoutViolation(kind)) {
+      set({
+        patrol: null,
+        lightPatrol: null,
+        pardon: false,
+        checkinStreak: 0,
+        stamp: { id: (stampSeq += 1), kind: 'pardon' },
+        catMessage: nextCatMessage('pardoned'),
+      })
+      return
+    }
     set({
       timer,
       patrol: null,
+      lightPatrol: null,
+      checkinStreak: 0,
       stamp: { id: (stampSeq += 1), kind },
       catMessage: nextCatMessage(timer.stars === 0 ? 'fail' : 'violation'),
     })
@@ -173,6 +217,26 @@ export const useSession = create<SessionStore>((set, get) => ({
     })
   },
 
+  setLightPatrol: (deadline) => {
+    set({ lightPatrol: { deadline } })
+  },
+
+  clearLightPatrol: () => set({ lightPatrol: null }),
+
+  takeLeave: () => {
+    const { timer } = get()
+    if (timer.status !== 'running' || timer.phase !== 'focus') return
+    set({
+      leave: { until: Date.now() + LEAVE_MS },
+      patrol: null,
+      lightPatrol: null,
+      peek: null,
+      catMessage: nextCatMessage('leave'),
+    })
+  },
+
+  returnEarly: () => set({ leave: null }),
+
   showPeek: (anchor, tone) => {
     peekSeq += 1
     set({ peek: { id: peekSeq, anchor, tone, at: Date.now() } })
@@ -182,7 +246,15 @@ export const useSession = create<SessionStore>((set, get) => ({
 
   ackPatrol: () => {
     if (!get().patrol) return
-    set({ patrol: null, peek: null, catMessage: nextCatMessage('approve') })
+    const { checkinStreak, pardon } = get()
+    const trust = advanceTrust(checkinStreak, pardon)
+    set({
+      patrol: null,
+      peek: null,
+      checkinStreak: trust.streak,
+      pardon: trust.pardon,
+      catMessage: nextCatMessage(trust.earned ? 'pardon' : 'approve'),
+    })
   },
 
   clearPatrol: () => set({ patrol: null }),
@@ -206,6 +278,10 @@ export const useSession = create<SessionStore>((set, get) => ({
     set({
       timer: timerFromSettings(readSettingsSnapshot()),
       patrol: null,
+      lightPatrol: null,
+      leave: null,
+      checkinStreak: 0,
+      pardon: false,
       peek: null,
       result: null,
     }),
@@ -234,6 +310,7 @@ function readSettingsSnapshot(): Settings {
     catName: '耄耋',
     hasCustomCat: false,
     supervisionEnabled: false,
+    cameraWatch: false,
     backgroundMode: 'room',
     galleryId: 'image-01',
     galleryRotateMin: 10,

@@ -15,9 +15,18 @@ describe('settings: cat name and supervision migration', () => {
     const loaded = loadSettings()
     expect(loaded.catName).toBe('耄耋')
     expect(loaded.supervisionEnabled).toBe(false)
+    expect(loaded.cameraWatch).toBe(false)
     expect(loaded.backgroundMode).toBe('room')
     expect(loaded.galleryRotateMin).toBe(10)
     expect(loaded.ambienceId).toBe('rain')
+  })
+
+  it('首次迁移后，用户主动开启监督会被保留', () => {
+    localStorage.setItem('lr.supervision-default-off.v1', '1')
+    saveSettings({ ...defaultSettings, supervisionEnabled: true, cameraWatch: true })
+    const loaded = loadSettings()
+    expect(loaded.supervisionEnabled).toBe(true)
+    expect(loaded.cameraWatch).toBe(true)
   })
 
   it('首次迁移后，用户主动选图集仍会被保留', () => {

@@ -3,7 +3,7 @@ export type Phase = 'idle' | 'focus' | 'break' | 'done'
 export type Status = 'idle' | 'running' | 'paused' | 'finished'
 export type SupervisionMode = 'lenient' | 'standard' | 'strict'
 export type SceneId = 'rainy-study' | 'dusk-library' | 'dawn-desk'
-export type ViolationKind = 'away' | 'no-checkin'
+export type ViolationKind = 'away' | 'no-checkin' | 'absent'
 export type SessionStatus = 'completed' | 'aborted' | 'failed'
 
 export interface Violation {
@@ -57,6 +57,7 @@ export interface Settings {
   catName: string
   hasCustomCat: boolean
   supervisionEnabled: boolean
+  cameraWatch: boolean
   backgroundMode: 'gallery' | 'room'
   galleryId: string
   galleryRotateMin: number
@@ -83,5 +84,14 @@ export interface Progress {
 export interface CatMessage {
   id: number
   text: string
-  tone: 'idle' | 'patrol' | 'approve' | 'violation' | 'fail' | 'complete'
+  tone:
+    | 'idle'
+    | 'patrol'
+    | 'approve'
+    | 'violation'
+    | 'fail'
+    | 'complete'
+    | 'leave'
+    | 'pardon'
+    | 'pardoned'
 }

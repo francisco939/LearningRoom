@@ -416,13 +416,12 @@ def main() -> int:
     if not CAT_SRC.exists():
         raise SystemExit(
             f"缺少督学源图：{CAT_SRC}\n"
-            "请把作者提供的 2048×2048 原图放到这个位置，或只重新生成雨声/图标时先手动跳过肖像。"
+            "请把作者提供的 2048×2048 原图放到这个位置，或只重新生成图标时先手动跳过肖像。"
         )
-    download(RAIN_URL, RAIN_SRC, force=args.force)
+    # 雨声已替换为用户提供的 5 分钟素材；不再下载旧 Freesound 源覆盖成品。
+    # download(RAIN_URL, RAIN_SRC, force=args.force)
     prepare_portrait()
     prepare_icons()
-    prepare_audio()
-    print(f"\n音频命令（等价）：\n  {FFMPEG_COMMAND}")
     report()
     return 0
 

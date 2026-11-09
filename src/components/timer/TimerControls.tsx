@@ -104,7 +104,9 @@ export function TimerControls({ onOpenSettings }: TimerControlsProps) {
         {patrol
           ? '耄耋在看你 —— 按空格或点「喵」'
           : running
-            ? '空格暂停 · S 跳过 · R 放弃'
+            ? settings.supervisionEnabled
+              ? '空格暂停 · S 跳过 · R 放弃 · L 请假'
+              : '空格暂停 · S 跳过 · R 放弃'
             : paused
               ? '空格继续'
               : '空格开始 · 1/2/3 切换模式'}

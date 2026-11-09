@@ -1,11 +1,11 @@
 import { Fish, Flame, History, Images, Settings, Trophy, PawPrint, UserRound, Users } from 'lucide-react'
 import { useProgress } from '@/store/useProgress'
 import { useSettings } from '@/store/useSettings'
+import { useSession } from '@/store/useSession'
 import { useAuth } from '@/store/useAuth'
 import type { PresenceSnapshot } from '@/lib/api'
 import { levelFor } from '@/data/levels'
 import { cn } from '@/lib/cn'
-import { PURE_STUDY_ROOM } from '@/lib/studyMode'
 
 interface TopBarProps {
   onOpenHistory: () => void
@@ -29,7 +29,10 @@ export function TopBar({
   const progress = useProgress((s) => s.progress)
   const user = useAuth((s) => s.user)
   const supervisionEnabled = useSettings((s) => s.settings.supervisionEnabled)
-  const catEnabled = !PURE_STUDY_ROOM && supervisionEnabled
+  const catEnabled = supervisionEnabled
+  const lightPatrol = useSession((s) => s.lightPatrol)
+  const checkinStreak = useSession((s) => s.checkinStreak)
+  const pardon = useSession((s) => s.pardon)
   const level = levelFor(progress.totalFocusSec)
   const nextHours = level.next?.minHours ?? level.current.minHours
   const prevHours = level.current.minHours
@@ -44,6 +47,14 @@ export function TopBar({
         <span className="grid h-10 w-10 place-items-center rounded-full border border-paper/15 bg-black/25 text-amber">
           <PawPrint size={19} />
         </span>
+        {lightPatrol && (
+          <span
+            className="grid h-7 w-7 animate-pulse place-items-center rounded-full bg-amber/20 text-amber"
+            title="耄耋在轻巡查"
+          >
+            <PawPrint size={14} />
+          </span>
+        )}
         <div className="leading-tight">
           <div className="font-display text-[18px] tracking-[0.18em] text-paper drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)] sm:text-[21px]">
             LearningRoom
@@ -62,6 +73,13 @@ export function TopBar({
             <span className="h-1.5 w-20 overflow-hidden rounded-full level-track">
               <span className="block h-full level-fill" style={{ width: `${ratio * 100}%` }} />
             </span>
+          </div>
+        )}
+
+        {catEnabled && (pardon || checkinStreak > 0) && (
+          <div className="hidden items-center gap-1.5 rounded-full border border-amber/25 bg-amber/10 px-3 py-1.5 sm:flex">
+            <PawPrint size={13} className="text-amber" />
+            <span className="text-[12px] text-amber">{pardon ? '免罚' : `信任 ${checkinStreak}/3`}</span>
           </div>
         )}
 

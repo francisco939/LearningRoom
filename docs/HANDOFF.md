@@ -1,8 +1,9 @@
 # LearningRoom · 耄耋自习室 — 交接文档
 
-> **版本说明**：本文保留的是历史监督版说明。当前 `main` 与 `feat/stillwhere-study-room`
-> 都已是纯自习室版本，功能、后端和待办以 [README](../README.md) 与
-> [server/README](../server/README.md) 为准；监督版最后停留在 `17760d6`。
+> **版本说明**：当前 `main` 为混合版：纯自习室 + 可选监督，监督默认关闭。
+> 监督机制由「设置 → 耄耋的巡查」开关控制，摄像头查岗需单独开启；
+> 本文其余内容是历史监督版说明，功能、后端和待办以 [README](../README.md) 与
+> [server/README](../server/README.md) 为准。
 >
 > 交接基线：`85360c4`（本交接文档之后的提交以 `git log -1` 为准）。
 > 读者：接手的开发者 / 设计师。目标：**30 分钟跑起来，2 小时知道该改哪里**。
@@ -315,7 +316,7 @@ python scripts/prepare-video-frames.py
 
 | 文件 | 来源 | 许可 | 用途 |
 | --- | --- | --- | --- |
-| `public/audio/rain.m4a` | seth-m / Freesound 270349 | CC0 1.0 | 40 秒雨声循环，可开关/调音量 |
+| `public/audio/rain.m4a` | 用户提供 | 仅用于本项目 | 5 分钟雨声循环，可开关/调音量 |
 | `public/audio/hiss.m4a` | Zabuhailo / Wikimedia Commons | CC0 1.0 | 1.4 秒真实猫哈气，yell 时播放 |
 
 - `Ambience.hiss()` 优先播 `hiss.m4a`，失败才用 Web Audio 合成噪声。

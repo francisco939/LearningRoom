@@ -119,6 +119,36 @@ class Ambience {
     }
   }
 
+  async scratch(): Promise<void> {
+    try {
+      const ctx = this.ensureContext()
+      if (!ctx) return
+      await ctx.resume()
+      const duration = 0.35
+      const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate)
+      const data = buffer.getChannelData(0)
+      for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1
+
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      const band = ctx.createBiquadFilter()
+      band.type = 'bandpass'
+      band.Q.value = 1.1
+      const t0 = ctx.currentTime
+      band.frequency.setValueAtTime(3200, t0)
+      band.frequency.exponentialRampToValueAtTime(1200, t0 + duration)
+      const gain = ctx.createGain()
+      gain.gain.setValueAtTime(0.0001, t0)
+      gain.gain.exponentialRampToValueAtTime(0.1, t0 + 0.03)
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration)
+      source.connect(band).connect(gain).connect(ctx.destination)
+      source.start(t0)
+      source.stop(t0 + duration)
+    } catch {
+      /* audio is optional */
+    }
+  }
+
   async chime(kind: 'done' | 'break' = 'done'): Promise<void> {
     try {
       const ctx = this.ensureContext()

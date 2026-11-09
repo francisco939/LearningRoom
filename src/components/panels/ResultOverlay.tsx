@@ -6,7 +6,6 @@ import { ACHIEVEMENTS } from '@/data/achievements'
 import { formatDuration } from '@/lib/stats'
 import { ambience } from '@/lib/audio'
 import { cn } from '@/lib/cn'
-import { PURE_STUDY_ROOM } from '@/lib/studyMode'
 
 interface ResultOverlayProps {
   onOpenHistory: () => void
@@ -23,7 +22,7 @@ export function ResultOverlay({ onOpenHistory }: ResultOverlayProps) {
   if (!result) return null
 
   const { session, unlocked } = result
-  const supervisionEnabled = !PURE_STUDY_ROOM && settings.supervisionEnabled
+  const supervisionEnabled = settings.supervisionEnabled
   const failed = session.status === 'failed'
   const aborted = session.status === 'aborted'
   const names = ACHIEVEMENTS.filter((a) => unlocked.includes(a.id))

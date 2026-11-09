@@ -29,9 +29,19 @@ export function useHotkeys(onEscape?: () => void): void {
         } else if (session.timer.status === 'paused') {
           session.resume()
         } else {
-          if (settings.settings.sound) void ambience.start(settings.settings.volume)
+          if (settings.settings.sound) {
+            void ambience.start(settings.settings.volume, settings.settings.ambienceId)
+          }
           session.start(settings.settings)
         }
+        return
+      }
+
+      if (key === 'l') {
+        if (!settings.settings.supervisionEnabled) return
+        if (session.timer.status !== 'running' || session.timer.phase !== 'focus') return
+        if (session.leave) session.returnEarly()
+        else session.takeLeave()
         return
       }
 
