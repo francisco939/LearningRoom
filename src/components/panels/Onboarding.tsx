@@ -64,7 +64,7 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
       icon: <Headphones size={16} />,
       eyebrow: 'SOUND ON',
       title: '给房间一点声音',
-      body: '雨声、咖啡馆、图书馆、壁炉或夜。环境音只是背景，不会打断你；开始后也可以在设置里换。',
+      body: '雨声、咖啡馆、图书馆、壁炉或夜。点一下只是选中，打开「环境音」并开始计时后才会响起；暂停或结束时自动停下，之后也能在设置里随时换。',
       extra: (
         <div className="mt-5 flex flex-wrap gap-2">
           {['雨声', '咖啡馆', '图书馆', '壁炉', '夜'].map((label) => (

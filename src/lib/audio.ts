@@ -1,8 +1,9 @@
 import { ambienceById, DEFAULT_AMBIENCE_ID } from '@/data/ambience'
 
 const HISS_SRC = `${import.meta.env.BASE_URL}audio/hiss.m4a`
+const FADE_STEP_MS = 50
 
-class Ambience {
+export class Ambience {
   private audio: HTMLAudioElement | null = null
   private hissAudio: HTMLAudioElement | null = null
   private ctx: AudioContext | null = null
@@ -10,13 +11,26 @@ class Ambience {
   private volume = 0.5
   private started = false
   private trackId = DEFAULT_AMBIENCE_ID
+  /** start/stop 各自递增；异步播放完成后用它判断这次请求是否已经过期。 */
+  private generation = 0
+  /** 串行化 start：并发调用各自造一份 audio 时，停的时候只会停掉其中一份。 */
+  private queue: Promise<void> = Promise.resolve()
 
-  async start(volume: number, trackId = this.trackId): Promise<void> {
+  start(volume: number, trackId = this.trackId): Promise<void> {
     this.volume = clamp01(volume)
+    const generation = (this.generation += 1)
+    const run = this.queue.then(() => this.play(generation, trackId))
+    this.queue = run.catch(() => {})
+    return run
+  }
+
+  private async play(generation: number, trackId: string): Promise<void> {
+    if (generation !== this.generation) return
 
     if (this.audio && this.started) {
       this.audio.volume = this.volume
-      if (trackId !== this.trackId) await this.setTrack(trackId)
+      if (trackId !== this.trackId) await this.setTrack(trackId, generation)
+      if (generation !== this.generation || !this.audio || !this.started) return
       await this.audio.play().catch(() => {})
       return
     }
@@ -30,15 +44,21 @@ class Ambience {
 
     try {
       await audio.play()
-      this.audio = audio
-      this.started = true
-      fadeElement(audio, 0, this.volume, 900)
     } catch {
-      this.started = false
+      if (generation === this.generation) this.started = false
+      return
     }
+    // 播放期间可能已被 stop() 或新的 start() 取代，别让这条音轨继续响。
+    if (generation !== this.generation) {
+      audio.pause()
+      return
+    }
+    this.audio = audio
+    this.started = true
+    fadeElement(audio, 0, this.volume, 900)
   }
 
-  async setTrack(trackId: string): Promise<void> {
+  async setTrack(trackId: string, generation = this.generation): Promise<void> {
     if (trackId === this.trackId) return
     this.trackId = trackId
     if (!this.started || !this.audio) return
@@ -52,12 +72,18 @@ class Ambience {
 
     try {
       await next.play()
-      this.audio = next
-      fadeElement(next, 0, this.volume, 900)
-      fadeElement(old, old.volume, 0, 700, () => old.pause())
     } catch {
       // 新音轨加载失败时继续播放旧音轨。
+      return
     }
+    if (generation !== this.generation) {
+      next.pause()
+      return
+    }
+    this.audio = next
+    // 先快速收掉旧音轨再让新音轨淡入：两段环境音叠在一起会被听成「混音」。
+    fadeElement(old, old.volume, 0, 150, () => old.pause())
+    fadeElement(next, 0, this.volume, 500)
   }
 
   setVolume(volume: number): void {
@@ -66,13 +92,14 @@ class Ambience {
   }
 
   stop(): void {
-    if (!this.audio) {
-      this.started = false
-      return
-    }
+    this.generation += 1
     const audio = this.audio
     this.started = false
-    fadeElement(audio, audio.volume, 0, 500, () => audio.pause())
+    if (!audio) return
+    fadeElement(audio, audio.volume, 0, 500, () => {
+      audio.pause()
+      if (this.audio === audio) this.audio = null
+    })
   }
 
   async hiss(): Promise<void> {
@@ -194,14 +221,17 @@ function fadeElement(
   ms: number,
   done?: () => void,
 ): void {
-  const start = performance.now()
-  const step = () => {
-    const t = Math.min(1, (performance.now() - start) / ms)
+  // 用定时器而不是 rAF：后台标签页的 rAF 会被暂停，淡出回调不执行，音频就永远停不下来。
+  const steps = Math.max(1, Math.round(ms / FADE_STEP_MS))
+  let step = 0
+  const timer = window.setInterval(() => {
+    step += 1
+    const t = Math.min(1, step / steps)
     audio.volume = clamp01(from + (to - from) * t)
-    if (t < 1) requestAnimationFrame(step)
-    else done?.()
-  }
-  requestAnimationFrame(step)
+    if (t < 1) return
+    window.clearInterval(timer)
+    done?.()
+  }, FADE_STEP_MS)
 }
 
 function clamp01(v: number): number {
