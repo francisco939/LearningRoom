@@ -356,17 +356,40 @@ function NumberField({
   max: number
   onChange: (value: number) => void
 }) {
+  // 输入过程中保留原文（允许清空、超范围的中间态），失焦/回车时再收敛到合法值；
+  // 之前按受控值直接拦截非法输入，删光就会立刻弹回旧值，光标里根本改不动。
+  const [draft, setDraft] = useState<string | null>(null)
+
+  const commit = (raw: string) => {
+    const next = Number(raw)
+    setDraft(null)
+    if (!raw.trim() || !Number.isFinite(next)) return
+    onChange(Math.min(max, Math.max(min, Math.round(next))))
+  }
+
   return (
-    <label className="block rounded-xl border border-paper/10 bg-black/15 px-3 py-2">
+    <label className="block rounded-xl border border-paper/10 bg-black/15 px-3 py-2 focus-within:border-paper/25">
       <span className="block text-[12px] text-paper/35">{label}</span>
       <input
         type="number"
+        inputMode="numeric"
         min={min}
         max={max}
-        value={value}
+        value={draft ?? String(value)}
+        onFocus={(event) => event.currentTarget.select()}
         onChange={(event) => {
-          const next = Number(event.target.value)
-          if (Number.isFinite(next) && next >= min && next <= max) onChange(Math.round(next))
+          const raw = event.target.value
+          setDraft(raw)
+          const next = Number(raw)
+          // 输入合法时即时生效，数字在面板里的其它地方会同步变化。
+          if (raw.trim() && Number.isFinite(next) && next >= min && next <= max) {
+            onChange(Math.round(next))
+          }
+        }}
+        onBlur={(event) => commit(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') event.currentTarget.blur()
+          if (event.key === 'Escape') setDraft(null)
         }}
         className="tabular mt-1 w-full bg-transparent text-[15px] text-paper/90 outline-none"
       />

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Fish, Flame, History, Images, Settings, Trophy, PawPrint, UserRound, Users } from 'lucide-react'
 import { useProgress } from '@/store/useProgress'
 import { useSettings } from '@/store/useSettings'
@@ -6,6 +7,10 @@ import { useAuth } from '@/store/useAuth'
 import type { PresenceSnapshot } from '@/lib/api'
 import { levelFor } from '@/data/levels'
 import { cn } from '@/lib/cn'
+
+/** 计时进行中，无操作这么久后顶栏自动收上去。 */
+const HIDE_AFTER_MS = 10_000
+const WAKE_EVENTS = ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart'] as const
 
 interface TopBarProps {
   onOpenHistory: () => void
@@ -31,6 +36,27 @@ export function TopBar({
   const supervisionEnabled = useSettings((s) => s.settings.supervisionEnabled)
   const catEnabled = supervisionEnabled
   const lightPatrol = useSession((s) => s.lightPatrol)
+  const running = useSession((s) => s.timer.status === 'running')
+  const startedAt = useSession((s) => s.timer.startedAt ?? 0)
+  // 记录「哪一次计时的顶栏已经闲置收起了」，换一次计时就自然恢复显示，无需额外重置。
+  const [idleSession, setIdleSession] = useState<number | null>(null)
+  const hidden = running && idleSession === startedAt
+
+  // 计时进行中：15 秒没操作就把顶栏收起来；一动鼠标/键盘/滚轮就重新出现并重新计时。
+  useEffect(() => {
+    if (!running) return
+    let timer = window.setTimeout(() => setIdleSession(startedAt), HIDE_AFTER_MS)
+    const wake = () => {
+      setIdleSession(null)
+      window.clearTimeout(timer)
+      timer = window.setTimeout(() => setIdleSession(startedAt), HIDE_AFTER_MS)
+    }
+    for (const event of WAKE_EVENTS) window.addEventListener(event, wake, { passive: true })
+    return () => {
+      window.clearTimeout(timer)
+      for (const event of WAKE_EVENTS) window.removeEventListener(event, wake)
+    }
+  }, [running, startedAt])
   const checkinStreak = useSession((s) => s.checkinStreak)
   const pardon = useSession((s) => s.pardon)
   const level = levelFor(progress.totalFocusSec)
@@ -42,7 +68,13 @@ export function TopBar({
       : Math.min(1, Math.max(0, (progress.totalFocusSec / 3600 - prevHours) / (nextHours - prevHours)))
 
   return (
-    <header className="absolute inset-x-0 top-0 z-30 flex h-[72px] items-center justify-between gap-3 border-b border-white/5 bg-[#0b0908]/60 px-4 backdrop-blur-md sm:h-[80px] sm:px-7">
+    <header
+      className={cn(
+        'absolute inset-x-0 top-0 z-30 flex h-[72px] items-center justify-between gap-3 border-b border-white/5 bg-[#0b0908]/60 px-4 backdrop-blur-md sm:h-[80px] sm:px-7',
+        'transition-transform duration-500 ease-out',
+        hidden ? '-translate-y-full pointer-events-none' : 'translate-y-0',
+      )}
+    >
       <div className="flex items-center gap-3">
         <span className="grid h-10 w-10 place-items-center rounded-full border border-paper/15 bg-black/25 text-amber">
           <PawPrint size={19} />

@@ -13,16 +13,23 @@ interface PanelProps {
 
 export function Panel({ open, title, subtitle, onClose, children, wide = false }: PanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
+  const onCloseRef = useRef(onClose)
 
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
+  // 只在面板打开的那一刻把焦点放到关闭按钮上。父组件每次渲染都会传新的 onClose，
+  // 若把它放进依赖里，任何一次重渲染都会重新抢焦点——正在输入的数字框会立刻失焦。
   useEffect(() => {
     if (!open) return
     closeRef.current?.focus()
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') onCloseRef.current()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
 
