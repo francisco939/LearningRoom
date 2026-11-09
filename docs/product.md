@@ -1,5 +1,8 @@
 # 产品规则与实现说明
 
+> 本文对应 `main` 的监督版。`feat/stillwhere-study-room` 是纯自习室分支：不展示/不启用监督，
+> 主要功能见 [README](../README.md) 与 [server/README](../server/README.md)。
+
 ## 1. 核心循环
 
 ```

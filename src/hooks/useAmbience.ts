@@ -6,6 +6,7 @@ import { ambience } from '@/lib/audio'
 export function useAmbience(): void {
   const sound = useSettings((s) => s.settings.sound)
   const volume = useSettings((s) => s.settings.volume)
+  const ambienceId = useSettings((s) => s.settings.ambienceId)
   const status = useSession((s) => s.timer.status)
 
   useEffect(() => {
@@ -14,9 +15,9 @@ export function useAmbience(): void {
 
   useEffect(() => {
     if (sound && status === 'running') {
-      void ambience.start(volume)
+      void ambience.start(volume, ambienceId)
     } else {
       ambience.stop()
     }
-  }, [sound, status, volume])
+  }, [sound, status, volume, ambienceId])
 }

@@ -77,6 +77,21 @@ ffmpeg -y -i "assets-src/rain_comp.wav" -af "$FILTER2" -ac 1 -ar 44100 -c:a aac 
   时长、采样率、声道数与两遍归一化流程保持不变。
 - 压缩会让雨声更「稳定」，换来的是无需用户调音量就能听清，同时不削波。
 
+### 2.2 环境音（5 套）
+
+| id | 内容 | 作者 / 来源 | 许可 |
+| --- | --- | --- | --- |
+| `rain` | 雨 | seth-m / Freesound 270349 | CC0 1.0 |
+| `cafe` | 咖啡馆 | samyi / Freesound 382314 | CC0 1.0 |
+| `library` | 图书馆 | morosopher / Freesound 173344 | CC0 1.0 |
+| `fireplace` | 壁炉 | NoOneIsReal / Freesound 387128 | CC0 1.0 |
+| `night` | 夜 / 虫鸣 | felix.blume / Freesound 479041 | CC0 1.0 |
+
+- 产物：`public/audio/ambience/{cafe,library,fireplace,night}.m4a`，各约 30 秒，AAC 96kbps，单声道。
+- 处理：截取 30 秒、loudnorm 到 -18 LUFS、首尾 1 秒淡入淡出。
+- 雨声使用现有的 `public/audio/rain.m4a`（40 秒，-16 LUFS）。
+- 源预览文件在 `assets-src/ambience-src/`（不提交）；只保留成品。
+
 ## 3. 应用图标
 
 | 项 | 内容 |
@@ -107,6 +122,15 @@ maskable 版本把头像缩到 410×410，居中放在 `#14100d` 背景上，留
 这些图片不随 MIT 代码许可发布，仅用于本项目；缺失时自动使用 SVG 场景。
 
 界面字体使用 **Fraunces Variable**（拉丁/数字）与 **Manrope Variable**（UI 拉丁），通过 `@fontsource-variable` 打包，许可均为 **SIL OFL 1.1**；中文回退到系统宋体/苹方。
+
+### 4.1 动态图集（30 项）
+
+- **20 张静态图**：`public/gallery/images/01.webp … 20.webp`，Pexels 免费图库，16:9、1600×900、WebP。
+- **5 段 Pexels 动态**：`pexels-01 … 05`，Pexels 免费视频，6–8 秒、1280×720、H.264、无音轨。
+- **5 段用户动态**：`user-01 … 05`，由项目作者提供；同一规格，**当前待提供**，先用 poster 占位。
+- 视频成品在 R2 `gallery/videos/`，不提交仓库；poster 在 `public/gallery/posters/`。
+- 处理脚本：[`scripts/prepare-gallery.py`](scripts/prepare-gallery.py)（裁切/压缩/转码/poster）；上传：[`scripts/upload-gallery.mjs`](scripts/upload-gallery.mjs)。
+- Pexels 许可允许免费使用；页面保留 credit/license 字段。作者可替换为同规格素材。
 
 ## 5. 巡查帧动画
 

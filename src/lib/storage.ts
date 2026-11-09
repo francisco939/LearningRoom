@@ -1,4 +1,5 @@
 import type { Progress, Session, Settings } from './types'
+import { PURE_STUDY_ROOM } from './studyMode'
 
 export const KEYS = {
   settings: 'lr.settings.v1',
@@ -21,7 +22,12 @@ export const defaultSettings: Settings = {
   volume: 0.5,
   catName: '耄耋',
   hasCustomCat: false,
-  supervisionEnabled: true,
+  supervisionEnabled: !PURE_STUDY_ROOM,
+  backgroundMode: 'gallery',
+  galleryId: 'image-01',
+  galleryRotateMin: 10,
+  galleryShuffle: false,
+  ambienceId: 'rain',
   reducedMotion: 'system',
 }
 
@@ -70,7 +76,12 @@ export function loadSettings(): Settings {
     typeof merged.catName === 'string' && merged.catName.trim()
       ? merged.catName.trim().slice(0, 8)
       : defaultSettings.catName
-  merged.supervisionEnabled = merged.supervisionEnabled !== false
+  merged.supervisionEnabled = !PURE_STUDY_ROOM && merged.supervisionEnabled !== false
+  merged.backgroundMode = merged.backgroundMode === 'room' ? 'room' : 'gallery'
+  merged.galleryId = typeof merged.galleryId === 'string' ? merged.galleryId : 'image-01'
+  merged.galleryRotateMin = clamp(Number(merged.galleryRotateMin), 0, 60, 10)
+  merged.galleryShuffle = merged.galleryShuffle === true
+  merged.ambienceId = typeof merged.ambienceId === 'string' ? merged.ambienceId : 'rain'
   return merged
 }
 
@@ -96,6 +107,10 @@ export function saveProgress(progress: Progress): boolean {
 export function loadSessions(): Session[] {
   const stored = read<Session[]>(KEYS.sessions, [])
   return Array.isArray(stored) ? stored.slice(0, 1000) : []
+}
+
+export function saveSessions(sessions: Session[]): void {
+  write(KEYS.sessions, sessions.slice(0, 1000))
 }
 
 export function appendSession(session: Session): Session[] {

@@ -1,0 +1,46 @@
+# LearningRoom API - Cloudflare Workers configuration.
+#
+# Replace every value marked PLACEHOLDER before deploying. Secrets are NOT
+# stored in this file; create them with:
+#   npx wrangler secret put PASSWORD_PEPPER
+#   npx wrangler secret put RESEND_API_KEY
+name = "learningroom-api"
+main = "src/index.ts"
+compatibility_date = "2026-08-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+[vars]
+# Public production origins. API_ORIGIN and MEDIA_ORIGIN are consumed by future
+# media clients; no media upload endpoint exists in v1.
+APP_ORIGIN = "https://www.learningroom.dpdns.org"
+API_ORIGIN = "https://api.learningroom.dpdns.org"
+MEDIA_ORIGIN = "https://media.learningroom.dpdns.org"
+ENVIRONMENT = "production"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "learningroom-db"
+# PLACEHOLDER: replace with the id printed by:
+#   npx wrangler d1 create learningroom-db
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "learningroom-media"
+# PLACEHOLDER: create with:
+#   npx wrangler r2 bucket create learningroom-media
+# R2 is reserved for gallery media. v1 exposes no upload or media endpoints.
+
+[[durable_objects.bindings]]
+name = "PRESENCE"
+class_name = "PresenceRoom"
+
+# SQLite-backed Durable Object class so PresenceRoom is usable on the Workers
+# free plan. Keep this tag stable once deployed; add a new migration tag later.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["PresenceRoom"]

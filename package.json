@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "LearningRoom · 耄耋自习室 — 一个带老猫督学的沉浸式单人自习室",
+  "description": "LearningRoom · 自习室 — 场景、环境音、计时器、图集与轻社区的沉浸式自习空间",
   "license": "MIT",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,11 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "npm run lint && npm run test && npm run build"
+    "verify": "npm run lint && npm run test && npm run build",
+    "worker:dev": "npm --prefix server run dev",
+    "worker:test": "npm --prefix server run test",
+    "worker:typecheck": "npm --prefix server run typecheck",
+    "worker:deploy": "npm --prefix server run deploy"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.3.0",

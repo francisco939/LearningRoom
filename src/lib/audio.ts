@@ -1,4 +1,5 @@
-const RAIN_SRC = `${import.meta.env.BASE_URL}audio/rain.m4a`
+import { ambienceById, DEFAULT_AMBIENCE_ID } from '@/data/ambience'
+
 const HISS_SRC = `${import.meta.env.BASE_URL}audio/hiss.m4a`
 
 class Ambience {
@@ -8,22 +9,54 @@ class Ambience {
   private master: GainNode | null = null
   private volume = 0.5
   private started = false
+  private trackId = DEFAULT_AMBIENCE_ID
 
-  async start(volume: number): Promise<void> {
+  async start(volume: number, trackId = this.trackId): Promise<void> {
     this.volume = clamp01(volume)
-    if (!this.audio) {
-      const audio = new Audio(RAIN_SRC)
-      audio.loop = true
-      audio.preload = 'auto'
-      audio.volume = 0
-      this.audio = audio
+
+    if (this.audio && this.started) {
+      this.audio.volume = this.volume
+      if (trackId !== this.trackId) await this.setTrack(trackId)
+      await this.audio.play().catch(() => {})
+      return
     }
+
+    this.trackId = trackId
+    const track = ambienceById(trackId)
+    const audio = new Audio(`${import.meta.env.BASE_URL}${track.src}`)
+    audio.loop = true
+    audio.preload = 'auto'
+    audio.volume = 0
+
     try {
-      await this.audio.play()
+      await audio.play()
+      this.audio = audio
       this.started = true
-      this.fadeTo(this.volume, 900)
+      fadeElement(audio, 0, this.volume, 900)
     } catch {
       this.started = false
+    }
+  }
+
+  async setTrack(trackId: string): Promise<void> {
+    if (trackId === this.trackId) return
+    this.trackId = trackId
+    if (!this.started || !this.audio) return
+
+    const old = this.audio
+    const track = ambienceById(trackId)
+    const next = new Audio(`${import.meta.env.BASE_URL}${track.src}`)
+    next.loop = true
+    next.preload = 'auto'
+    next.volume = 0
+
+    try {
+      await next.play()
+      this.audio = next
+      fadeElement(next, 0, this.volume, 900)
+      fadeElement(old, old.volume, 0, 700, () => old.pause())
+    } catch {
+      // 新音轨加载失败时继续播放旧音轨。
     }
   }
 
@@ -33,25 +66,13 @@ class Ambience {
   }
 
   stop(): void {
-    if (!this.audio) return
-    this.fadeTo(0, 400, () => {
-      this.audio?.pause()
+    if (!this.audio) {
       this.started = false
-    })
-  }
-
-  private fadeTo(target: number, ms: number, done?: () => void): void {
-    const audio = this.audio
-    if (!audio) return
-    const from = audio.volume
-    const start = performance.now()
-    const step = () => {
-      const t = Math.min(1, (performance.now() - start) / ms)
-      audio.volume = clamp01(from + (target - from) * t)
-      if (t < 1) requestAnimationFrame(step)
-      else done?.()
+      return
     }
-    requestAnimationFrame(step)
+    const audio = this.audio
+    this.started = false
+    fadeElement(audio, audio.volume, 0, 500, () => audio.pause())
   }
 
   async hiss(): Promise<void> {
@@ -93,18 +114,6 @@ class Ambience {
       source.connect(band).connect(gain).connect(ctx.destination)
       source.start(t0)
       source.stop(t0 + duration)
-
-      const growl = ctx.createOscillator()
-      const growlGain = ctx.createGain()
-      growl.type = 'sawtooth'
-      growl.frequency.setValueAtTime(120, t0)
-      growl.frequency.exponentialRampToValueAtTime(70, t0 + duration)
-      growlGain.gain.setValueAtTime(0.0001, t0)
-      growlGain.gain.exponentialRampToValueAtTime(0.05, t0 + 0.04)
-      growlGain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration)
-      growl.connect(growlGain).connect(ctx.destination)
-      growl.start(t0)
-      growl.stop(t0 + duration)
     } catch {
       /* audio is optional */
     }
@@ -136,7 +145,9 @@ class Ambience {
 
   private ensureContext(): AudioContext | null {
     if (this.ctx) return this.ctx
-    const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+    const Ctor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
     if (!Ctor) return null
     this.ctx = new Ctor()
     this.master = this.ctx.createGain()
@@ -144,6 +155,23 @@ class Ambience {
     this.master.connect(this.ctx.destination)
     return this.ctx
   }
+}
+
+function fadeElement(
+  audio: HTMLAudioElement,
+  from: number,
+  to: number,
+  ms: number,
+  done?: () => void,
+): void {
+  const start = performance.now()
+  const step = () => {
+    const t = Math.min(1, (performance.now() - start) / ms)
+    audio.volume = clamp01(from + (to - from) * t)
+    if (t < 1) requestAnimationFrame(step)
+    else done?.()
+  }
+  requestAnimationFrame(step)
 }
 
 function clamp01(v: number): number {

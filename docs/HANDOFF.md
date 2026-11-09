@@ -1,5 +1,8 @@
 # LearningRoom · 耄耋自习室 — 交接文档
 
+> **分支说明**：本文对应 `main` 的监督版。当前 `feat/stillwhere-study-room` 是纯自习室分支，
+> 功能、后端和待办以 [README](../README.md) 与 [server/README](../server/README.md) 为准。
+>
 > 交接基线：`85360c4`（本交接文档之后的提交以 `git log -1` 为准）。
 > 读者：接手的开发者 / 设计师。目标：**30 分钟跑起来，2 小时知道该改哪里**。
 > 先读：[README](../README.md) → 本文 → [docs/product.md](product.md)。

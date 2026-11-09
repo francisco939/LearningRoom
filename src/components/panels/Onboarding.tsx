@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { ArrowRight, Check, Eye, PawPrint, Timer } from 'lucide-react'
+import { ArrowRight, Check, Headphones, MapPin, Timer } from 'lucide-react'
 import { useSettings } from '@/store/useSettings'
 import { useProgress } from '@/store/useProgress'
+import { SCENES } from '@/data/scenes'
 import { cn } from '@/lib/cn'
 
 interface OnboardingProps {
@@ -11,6 +12,7 @@ interface OnboardingProps {
 
 export function Onboarding({ open, onDone }: OnboardingProps) {
   const [step, setStep] = useState(0)
+  const settings = useSettings((s) => s.settings)
   const update = useSettings((s) => s.update)
   const setOnboarded = useProgress((s) => s.setOnboarded)
 
@@ -23,25 +25,64 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
 
   const steps = [
     {
-      icon: <PawPrint size={16} />,
-      eyebrow: '退休监学猫',
-      title: '这是耄耋',
-      body: '它不抓老鼠了，改抓摸鱼。你负责坐住，它负责偶尔抬头看你一眼。',
+      icon: <MapPin size={16} />,
+      eyebrow: 'STILL HERE',
+      title: '先选一个地方',
+      body: '不必决定得太认真。选一个现在愿意坐下来的房间，之后随时可以换。',
       extra: (
-        <div className="mx-auto mt-5 w-32 overflow-hidden rounded-lg border border-paper/20 bg-black/30 p-1 shadow-xl">
-          <img
-            src={`${import.meta.env.BASE_URL}supervisor/maodie.webp`}
-            alt="一只上了年纪的橘猫，正眯着眼盯人"
-            className="aspect-[4/5] w-full rounded object-cover"
-          />
+        <div className="mt-5 grid gap-2">
+          {SCENES.map((scene) => (
+            <button
+              key={scene.id}
+              type="button"
+              onClick={() => update({ scene: scene.id })}
+              className={cn(
+                'flex items-center gap-3 rounded-xl border p-2 text-left transition',
+                settings.scene === scene.id
+                  ? 'border-amber/45 bg-amber/[0.08]'
+                  : 'border-paper/10 bg-black/20 hover:border-paper/25',
+              )}
+            >
+              <img
+                src={`${import.meta.env.BASE_URL}${scene.photo}`}
+                alt=""
+                className="h-12 w-20 shrink-0 rounded-md object-cover"
+                onError={(event) => {
+                  event.currentTarget.style.visibility = 'hidden'
+                }}
+              />
+              <span>
+                <span className="block text-[14px] text-paper/85">{scene.name}</span>
+                <span className="mt-0.5 block text-[12px] text-paper/40">{scene.subtitle}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      ),
+    },
+    {
+      icon: <Headphones size={16} />,
+      eyebrow: 'SOUND ON',
+      title: '给房间一点声音',
+      body: '雨声、咖啡馆、图书馆、壁炉或夜。环境音只是背景，不会打断你；开始后也可以在设置里换。',
+      extra: (
+        <div className="mt-5 flex flex-wrap gap-2">
+          {['雨声', '咖啡馆', '图书馆', '壁炉', '夜'].map((label) => (
+            <span
+              key={label}
+              className="rounded-full border border-paper/10 bg-black/20 px-3 py-1.5 text-[12px] text-paper/55"
+            >
+              {label}
+            </span>
+          ))}
         </div>
       ),
     },
     {
       icon: <Timer size={16} />,
-      eyebrow: '先定个节奏',
-      title: '选一种坐法',
-      body: '番茄钟适合大多数人；倒计时适合只想坐一段；秒表适合不想被结束打断的人。',
+      eyebrow: 'ONE THING',
+      title: '让时间变得有意义',
+      body: '按下开始后，计时器会缩到右下角，把画面让给房间。暂停或结束时，它会回到中间。',
       extra: (
         <div className="mt-5 grid gap-2">
           {[
@@ -65,26 +106,6 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
             </button>
           ))}
         </div>
-      ),
-    },
-    {
-      icon: <Eye size={16} />,
-      eyebrow: '规则很简单',
-      title: '它只看你在不在',
-      body: '耄耋不打开摄像头，也不读你的屏幕。它只在意两件事：你有没有突然消失，以及它叫你的时候你有没有应声。',
-      extra: (
-        <ul className="mt-5 space-y-2 text-left text-[13px] text-paper/60">
-          {[
-            '切走标签页超时，扣一颗星',
-            '巡查时 15 秒内按空格或点「喵」',
-            '三颗星扣光，这一轮作废',
-          ].map((item) => (
-            <li key={item} className="flex items-start gap-2">
-              <Check size={14} className="mt-0.5 shrink-0 text-amber" />
-              {item}
-            </li>
-          ))}
-        </ul>
       ),
     },
   ]
@@ -146,6 +167,10 @@ export function Onboarding({ open, onDone }: OnboardingProps) {
             跳过
           </button>
         )}
+
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-[10px] tracking-wider text-paper/25">
+          <Check size={11} /> 无需登录 · 记录只保存在本机
+        </div>
       </div>
     </div>
   )
