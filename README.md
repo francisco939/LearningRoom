@@ -2,7 +2,7 @@
 
 > 选一个地方，调好声音，让时间变得有意义。
 
-这是 `feat/stillwhere-study-room` 分支：**纯自习室**。监督机制不在此分支开发，保留在 `main`。
+`main` 现在是**纯自习室**版本；`feat/stillwhere-study-room` 分支保留，内容与 `main` 同步。监督机制不在这一版开发，历史监督版可通过 `17760d6` 找回。
 
 ![自习室](docs/screenshots/study-hero.webp)
 
@@ -97,11 +97,12 @@ npm run worker:test   # 需要 workerd 可正常启动
 - [ ] 线上手工验收：注册→验证→登录→同步；两标签页在线人数
 - [ ] 移动端 390×844 适配复查
 
-## 与 main 的关系
+## 关于监督版
 
-- `main` 仍是有耄耋监督的版本。
-- 本分支通过 `PURE_STUDY_ROOM=true` 隐藏监督入口，不修改监督核心代码。
-- 合并回 `main` 前需要决定保留哪些 UI、是否把纯模式作为开关而不是分支默认。
+- 当前 `main` 和 `feat/stillwhere-study-room` 都是纯自习室版本。
+- 监督入口通过 `PURE_STUDY_ROOM=true` 隐藏；监督核心代码仍在仓库里，但默认不启用、不展示。
+- 监督版最后停留在 `17760d6`；需要时可从该提交恢复，或把 `PURE_STUDY_ROOM` 改回 `false` 并恢复默认设置。
+- 后续要把纯模式做成正式开关，再调整 `studyMode.ts` 和设置默认值即可。
 
 ## 文档
 
