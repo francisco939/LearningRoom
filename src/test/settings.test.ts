@@ -15,9 +15,15 @@ describe('settings: cat name and supervision migration', () => {
     const loaded = loadSettings()
     expect(loaded.catName).toBe('耄耋')
     expect(loaded.supervisionEnabled).toBe(false)
-    expect(loaded.backgroundMode).toBe('gallery')
+    expect(loaded.backgroundMode).toBe('room')
     expect(loaded.galleryRotateMin).toBe(10)
     expect(loaded.ambienceId).toBe('rain')
+  })
+
+  it('首次迁移后，用户主动选图集仍会被保留', () => {
+    localStorage.setItem('lr.background-mode-room.v1', '1')
+    saveSettings({ ...defaultSettings, backgroundMode: 'gallery' })
+    expect(loadSettings().backgroundMode).toBe('gallery')
   })
 
   it('保留用户关闭监督的选择', () => {

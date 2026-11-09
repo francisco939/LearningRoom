@@ -9,19 +9,20 @@
 ## 这个分支有什么
 
 - **30 项动态图集**：20 张 Pexels 免费静图 + 5 段 Pexels 免费视频 + 5 段作者提供的美丽风景视频。默认 10 分钟自动轮换，可手动切换、随机、关闭。
+- **右上角「背景」按钮**：统一管理房间场景/动态图集、轮换与随机；设置面板不再放背景选项。
 - **计时器下沉**：开始后 700ms 平滑缩到右下角；暂停或结束回到中央。右下角点击即可暂停并展开。
 - **5 套环境音**：雨、咖啡馆、图书馆、壁炉、夜；CC0 素材，crossfade、音量、开关，刷新后保留。
 - **账户系统**：游客优先；邮箱密码注册/验证/登录/找回/改密/删除/导出；登录后同步设置与专注记录。
 - **在线人数**：Durable Object WebSocket 统计在线/专注人数；交流区消息流本期**未实现**，只留占位与 TODO。
 - **纯自习模式**：没有猫、巡查、扣星；计时、记录、成就、历史照常。
 
-| 图集 | 计时器收缩 |
+| 背景管理 | 计时器收缩 |
 | --- | --- |
-| ![动态图集](docs/screenshots/study-gallery-panel.webp) | ![收缩计时](docs/screenshots/study-compact.webp) |
+| ![背景管理](docs/screenshots/study-background.webp) | ![收缩计时](docs/screenshots/study-compact.webp) |
 
-| 设置 | 房间场景 |
-| --- | --- |
-| ![设置](docs/screenshots/study-settings.webp) | 图集/房间可切换 |
+| 设置 |
+| --- |
+| ![设置](docs/screenshots/study-settings.webp) |
 
 ## 技术栈
 

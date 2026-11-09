@@ -225,9 +225,18 @@ export default function App() {
         open={panel === 'gallery'}
         onClose={() => setPanel(null)}
         currentId={gallery.current.id}
-        onSelect={gallery.select}
-        onPrev={gallery.prev}
-        onNext={gallery.next}
+        onSelect={(id) => {
+          useSettings.getState().update({ backgroundMode: 'gallery' })
+          gallery.select(id)
+        }}
+        onPrev={() => {
+          useSettings.getState().update({ backgroundMode: 'gallery' })
+          gallery.prev()
+        }}
+        onNext={() => {
+          useSettings.getState().update({ backgroundMode: 'gallery' })
+          gallery.next()
+        }}
       />
       <HistoryPanel open={panel === 'history'} onClose={() => setPanel(null)} />
       <AchievementsPanel open={panel === 'achievements'} onClose={() => setPanel(null)} />

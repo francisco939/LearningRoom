@@ -23,7 +23,7 @@ export const defaultSettings: Settings = {
   catName: '耄耋',
   hasCustomCat: false,
   supervisionEnabled: !PURE_STUDY_ROOM,
-  backgroundMode: 'gallery',
+  backgroundMode: 'room',
   galleryId: 'image-01',
   galleryRotateMin: 10,
   galleryShuffle: false,
@@ -77,7 +77,19 @@ export function loadSettings(): Settings {
       ? merged.catName.trim().slice(0, 8)
       : defaultSettings.catName
   merged.supervisionEnabled = !PURE_STUDY_ROOM && merged.supervisionEnabled !== false
-  merged.backgroundMode = merged.backgroundMode === 'room' ? 'room' : 'gallery'
+  merged.backgroundMode = merged.backgroundMode === 'gallery' ? 'gallery' : 'room'
+
+  // 首次升级到“房间场景默认”时，把之前默认的 gallery 迁移一次；
+  // 迁移标记写好后，用户之后主动选图集仍会被尊重。
+  try {
+    if (!localStorage.getItem('lr.background-mode-room.v1')) {
+      merged.backgroundMode = 'room'
+      localStorage.setItem('lr.background-mode-room.v1', '1')
+    }
+  } catch {
+    /* localStorage unavailable */
+  }
+
   merged.galleryId = typeof merged.galleryId === 'string' ? merged.galleryId : 'image-01'
   merged.galleryRotateMin = clamp(Number(merged.galleryRotateMin), 0, 60, 10)
   merged.galleryShuffle = merged.galleryShuffle === true

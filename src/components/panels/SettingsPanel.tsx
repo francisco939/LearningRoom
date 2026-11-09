@@ -4,7 +4,6 @@ import { useSettings } from '@/store/useSettings'
 import { useProgress } from '@/store/useProgress'
 import { useSession } from '@/store/useSession'
 import { useCatImage } from '@/hooks/useCatImage'
-import { SCENES } from '@/data/scenes'
 import { AMBIENCE } from '@/data/ambience'
 import { ambience } from '@/lib/audio'
 import type { SupervisionMode } from '@/lib/types'
@@ -121,98 +120,6 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           </p>
         </Section>
         )}
-
-        <Section title="背景">
-          <div className="grid grid-cols-2 gap-2">
-            {(
-              [
-                ['gallery', '动态图集', '30 张，自动轮换'],
-                ['room', '房间场景', '雨夜 / 黄昏 / 清晨'],
-              ] as const
-            ).map(([value, label, hint]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => update({ backgroundMode: value })}
-                className={cn(
-                  'rounded-xl border px-3 py-3 text-left transition',
-                  settings.backgroundMode === value
-                    ? 'border-amber/45 bg-amber/[0.07]'
-                    : 'border-paper/8 bg-black/15 hover:border-paper/20',
-                )}
-              >
-                <span className="block text-[14px] text-paper/85">{label}</span>
-                <span className="mt-0.5 block text-[11px] text-paper/35">{hint}</span>
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[12px] text-paper/40">轮换</span>
-            {[
-              [5, '5 分钟'],
-              [10, '10 分钟'],
-              [15, '15 分钟'],
-              [0, '关闭'],
-            ].map(([value, label]) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => update({ galleryRotateMin: Number(value) })}
-                className={cn(
-                  'rounded-full border px-3 py-1.5 text-[12px] transition',
-                  settings.galleryRotateMin === value
-                    ? 'border-amber/40 text-amber/90'
-                    : 'border-paper/10 text-paper/45 hover:text-paper/75',
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <Toggle
-            label="随机顺序"
-            checked={settings.galleryShuffle}
-            onChange={(checked) => update({ galleryShuffle: checked })}
-          />
-        </Section>
-
-        <Section title="房间场景">
-          <div className="grid gap-2 sm:grid-cols-3">
-            {SCENES.map((scene) => (
-              <button
-                key={scene.id}
-                type="button"
-                onClick={() => update({ scene: scene.id })}
-                className={cn(
-                  'overflow-hidden rounded-xl border text-left transition',
-                  settings.scene === scene.id
-                    ? 'border-amber/50 ring-1 ring-amber/20'
-                    : 'border-paper/8 hover:border-paper/25',
-                )}
-              >
-                <span
-                  className="relative block h-16 w-full overflow-hidden"
-                  style={{
-                    background: `linear-gradient(160deg, ${scene.palette.wall} 0%, ${scene.palette.wall2} 55%, ${scene.palette.sky2} 100%)`,
-                  }}
-                >
-                  <img
-                    src={`${import.meta.env.BASE_URL}${scene.photo}`}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                    onError={(event) => {
-                      event.currentTarget.style.display = 'none'
-                    }}
-                  />
-                </span>
-                <span className="block px-3 py-2">
-                  <span className="block text-[13px] text-paper/80">{scene.name}</span>
-                  <span className="mt-0.5 block text-[12px] text-paper/35">{scene.subtitle}</span>
-                </span>
-              </button>
-            ))}
-          </div>
-        </Section>
 
         <Section title="声音">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">

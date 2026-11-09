@@ -234,7 +234,7 @@ function readSettingsSnapshot(): Settings {
     catName: '耄耋',
     hasCustomCat: false,
     supervisionEnabled: false,
-    backgroundMode: 'gallery',
+    backgroundMode: 'room',
     galleryId: 'image-01',
     galleryRotateMin: 10,
     galleryShuffle: false,

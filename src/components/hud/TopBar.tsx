@@ -81,7 +81,7 @@ export function TopBar({
         <IconButton label={user ? '账户' : '登录'} onClick={onOpenAccount}>
           <UserRound size={18} />
         </IconButton>
-        <IconButton label="动态图集" onClick={onOpenGallery}>
+        <IconButton label="背景" onClick={onOpenGallery}>
           <Images size={18} />
         </IconButton>
         <IconButton label="历史记录" onClick={onOpenHistory}>
