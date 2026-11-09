@@ -3,6 +3,7 @@ import { useSession } from '@/store/useSession'
 import { useSettings } from '@/store/useSettings'
 import { configFor, judgeAway, nextPatrolAt, withinCooldown } from '@/lib/supervision'
 import { pickAnchor } from '@/lib/peek'
+import { PURE_STUDY_ROOM } from '@/lib/studyMode'
 
 export function useSupervisor(): void {
   const status = useSession((s) => s.timer.status)
@@ -10,7 +11,8 @@ export function useSupervisor(): void {
   const startedAt = useSession((s) => s.timer.startedAt)
   const patrol = useSession((s) => s.patrol)
   const supervision = useSettings((s) => s.settings.supervision)
-  const enabled = useSettings((s) => s.settings.supervisionEnabled)
+  const supervisionEnabled = useSettings((s) => s.settings.supervisionEnabled)
+  const enabled = !PURE_STUDY_ROOM && supervisionEnabled
 
   const patrolTimer = useRef<number | null>(null)
   const checkinTimer = useRef<number | null>(null)

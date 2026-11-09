@@ -57,6 +57,11 @@ export interface Settings {
   catName: string
   hasCustomCat: boolean
   supervisionEnabled: boolean
+  backgroundMode: 'gallery' | 'room'
+  galleryId: string
+  galleryRotateMin: number
+  galleryShuffle: boolean
+  ambienceId: string
   reducedMotion: 'system' | 'on' | 'off'
 }
 

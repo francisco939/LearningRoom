@@ -40,7 +40,7 @@ export function TimerControls({ onOpenSettings }: TimerControlsProps) {
       return
     }
     setResult(null)
-    if (settings.sound) void ambience.start(settings.volume)
+    if (settings.sound) void ambience.start(settings.volume, settings.ambienceId)
     start(settings)
   }
 
@@ -48,11 +48,11 @@ export function TimerControls({ onOpenSettings }: TimerControlsProps) {
     <div className="flex flex-col items-center gap-4">
       <div className="glass flex items-center gap-1 rounded-full px-2 py-2 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
         <IconButton
-          label={settings.sound ? '关闭雨声' : '打开雨声'}
+          label={settings.sound ? '关闭环境音' : '打开环境音'}
           onClick={() => {
             const next = !settings.sound
             update({ sound: next })
-            if (next) void ambience.start(settings.volume)
+            if (next) void ambience.start(settings.volume, settings.ambienceId)
             else ambience.stop()
           }}
         >

@@ -1,0 +1,8 @@
+# Copy to .dev.vars for `npm run dev`. Never commit .dev.vars.
+# These are placeholders only; do not put real production secrets here.
+APP_ORIGIN=http://localhost:5173
+API_ORIGIN=http://localhost:8787
+MEDIA_ORIGIN=http://localhost:8787
+ENVIRONMENT=development
+PASSWORD_PEPPER=replace-with-a-long-random-dev-only-value
+RESEND_API_KEY=re_replace_with_a_resend_api_key

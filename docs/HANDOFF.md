@@ -1,5 +1,9 @@
 # LearningRoom · 耄耋自习室 — 交接文档
 
+> **版本说明**：本文保留的是历史监督版说明。当前 `main` 与 `feat/stillwhere-study-room`
+> 都已是纯自习室版本，功能、后端和待办以 [README](../README.md) 与
+> [server/README](../server/README.md) 为准；监督版最后停留在 `17760d6`。
+>
 > 交接基线：`85360c4`（本交接文档之后的提交以 `git log -1` 为准）。
 > 读者：接手的开发者 / 设计师。目标：**30 分钟跑起来，2 小时知道该改哪里**。
 > 先读：[README](../README.md) → 本文 → [docs/product.md](product.md)。

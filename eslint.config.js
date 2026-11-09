@@ -16,6 +16,7 @@ export default tseslint.config(
       '.pip-cache',
       '.tmp',
       'assets-src',
+      'server',
     ],
   },
   {

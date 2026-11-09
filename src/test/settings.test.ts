@@ -14,7 +14,10 @@ describe('settings: cat name and supervision migration', () => {
 
     const loaded = loadSettings()
     expect(loaded.catName).toBe('耄耋')
-    expect(loaded.supervisionEnabled).toBe(true)
+    expect(loaded.supervisionEnabled).toBe(false)
+    expect(loaded.backgroundMode).toBe('gallery')
+    expect(loaded.galleryRotateMin).toBe(10)
+    expect(loaded.ambienceId).toBe('rain')
   })
 
   it('保留用户关闭监督的选择', () => {

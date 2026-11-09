@@ -14,9 +14,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png', 'supervisor/maodie.webp', 'audio/rain.m4a'],
       manifest: {
-        name: 'LearningRoom · 耄耋自习室',
-        short_name: '耄耋自习室',
-        description: '一只退休的监学猫，陪你把这一轮坐完。',
+        name: 'LearningRoom · 自习室',
+        short_name: 'LearningRoom',
+        description: '选一个地方，调好声音，让时间变得有意义。',
         lang: 'zh-CN',
         theme_color: '#14100d',
         background_color: '#14100d',
@@ -37,8 +37,19 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webp,m4a,json}'],
+        globIgnores: ['gallery/**'],
         cleanupOutdatedCaches: true,
         navigateFallback: 'index.html',
+        runtimeCaching: [
+          {
+            urlPattern: /\/gallery\/images\/.*\.webp$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gallery-images',
+              expiration: { maxEntries: 30, maxAgeSeconds: 30 * 24 * 60 * 60 },
+            },
+          },
+        ],
       },
     }),
   ],
@@ -57,6 +68,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.ts',
+    include: ['src/test/**/*.{test,spec}.{ts,tsx}'],
     css: false,
   },
 })

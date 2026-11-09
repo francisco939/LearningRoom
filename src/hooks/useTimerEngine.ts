@@ -54,9 +54,9 @@ export function useTimerEngine(): void {
       const timer = useSession.getState().timer
       if (timer.status === 'running') {
         const label = timer.phase === 'break' ? '休息' : '专注'
-        document.title = `${formatClock(remainingSec(timer, Date.now()))} ${label} · 耄耋自习室`
+        document.title = `${formatClock(remainingSec(timer, Date.now()))} ${label} · 自习室`
       } else {
-        document.title = 'LearningRoom · 耄耋自习室'
+        document.title = 'LearningRoom · 自习室'
       }
     }, 1000)
     return () => window.clearInterval(id)

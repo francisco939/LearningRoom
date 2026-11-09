@@ -6,6 +6,7 @@ import {
   loadActive,
   loadProgress,
   loadSessions,
+  saveSessions,
   loadSettings,
   saveActive,
   saveProgress,
@@ -22,6 +23,7 @@ export interface Repository {
   loadProgress(): Progress
   saveProgress(progress: Progress): void
   loadSessions(): Session[]
+  saveSessions(sessions: Session[]): void
   appendSession(session: Session): void
   loadActive<T>(): T | null
   saveActive(state: unknown): void
@@ -35,6 +37,7 @@ export const localRepository: Repository = {
   loadProgress,
   saveProgress,
   loadSessions,
+  saveSessions,
   appendSession: (session) => {
     appendSession(session)
   },

@@ -233,7 +233,12 @@ function readSettingsSnapshot(): Settings {
     volume: 0.5,
     catName: '耄耋',
     hasCustomCat: false,
-    supervisionEnabled: true,
+    supervisionEnabled: false,
+    backgroundMode: 'gallery',
+    galleryId: 'image-01',
+    galleryRotateMin: 10,
+    galleryShuffle: false,
+    ambienceId: 'rain',
     reducedMotion: 'system',
   }
 }

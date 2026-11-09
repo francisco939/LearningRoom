@@ -1,18 +1,35 @@
-import { Fish, Flame, History, Settings, Trophy, PawPrint } from 'lucide-react'
+import { Fish, Flame, History, Images, Settings, Trophy, PawPrint, UserRound, Users } from 'lucide-react'
 import { useProgress } from '@/store/useProgress'
 import { useSettings } from '@/store/useSettings'
+import { useAuth } from '@/store/useAuth'
+import type { PresenceSnapshot } from '@/lib/api'
 import { levelFor } from '@/data/levels'
 import { cn } from '@/lib/cn'
+import { PURE_STUDY_ROOM } from '@/lib/studyMode'
 
 interface TopBarProps {
   onOpenHistory: () => void
   onOpenAchievements: () => void
   onOpenSettings: () => void
+  onOpenGallery: () => void
+  onOpenAccount: () => void
+  onOpenCommunity: () => void
+  presence: PresenceSnapshot & { offline: boolean }
 }
 
-export function TopBar({ onOpenHistory, onOpenAchievements, onOpenSettings }: TopBarProps) {
+export function TopBar({
+  onOpenHistory,
+  onOpenAchievements,
+  onOpenSettings,
+  onOpenGallery,
+  onOpenAccount,
+  onOpenCommunity,
+  presence,
+}: TopBarProps) {
   const progress = useProgress((s) => s.progress)
-  const catEnabled = useSettings((s) => s.settings.supervisionEnabled)
+  const user = useAuth((s) => s.user)
+  const supervisionEnabled = useSettings((s) => s.settings.supervisionEnabled)
+  const catEnabled = !PURE_STUDY_ROOM && supervisionEnabled
   const level = levelFor(progress.totalFocusSec)
   const nextHours = level.next?.minHours ?? level.current.minHours
   const prevHours = level.current.minHours
@@ -51,6 +68,22 @@ export function TopBar({ onOpenHistory, onOpenAchievements, onOpenSettings }: To
         <Stat icon={<Fish size={15} />} label="鱼干" value={progress.fish} />
         <Stat icon={<Flame size={15} />} label="连续" value={progress.streak} suffix="天" />
 
+        <button
+          type="button"
+          onClick={onOpenCommunity}
+          className="fish-pill hidden items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] text-amber/85 sm:flex"
+          title={presence.offline ? '在线人数暂不可用' : `${presence.online} 人在线`}
+        >
+          <Users size={14} />
+          {presence.offline ? '离线' : `${presence.online} 在线`}
+        </button>
+
+        <IconButton label={user ? '账户' : '登录'} onClick={onOpenAccount}>
+          <UserRound size={18} />
+        </IconButton>
+        <IconButton label="动态图集" onClick={onOpenGallery}>
+          <Images size={18} />
+        </IconButton>
         <IconButton label="历史记录" onClick={onOpenHistory}>
           <History size={18} />
         </IconButton>

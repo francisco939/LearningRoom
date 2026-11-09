@@ -5,10 +5,12 @@ import { useProgress } from '@/store/useProgress'
 import { useSession } from '@/store/useSession'
 import { useCatImage } from '@/hooks/useCatImage'
 import { SCENES } from '@/data/scenes'
+import { AMBIENCE } from '@/data/ambience'
 import { ambience } from '@/lib/audio'
 import type { SupervisionMode } from '@/lib/types'
 import { Panel } from './Panel'
 import { cn } from '@/lib/cn'
+import { PURE_STUDY_ROOM } from '@/lib/studyMode'
 
 interface SettingsPanelProps {
   open: boolean
@@ -74,6 +76,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           </p>
         </Section>
 
+        {!PURE_STUDY_ROOM && (
         <Section title="耄耋的巡查">
           <Toggle
             label="启用耄耋监督"
@@ -117,8 +120,63 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
               : '纯自习模式：没有探头、查岗和扣星，计时、记录与场景照常。'}
           </p>
         </Section>
+        )}
 
-        <Section title="场景">
+        <Section title="背景">
+          <div className="grid grid-cols-2 gap-2">
+            {(
+              [
+                ['gallery', '动态图集', '30 张，自动轮换'],
+                ['room', '房间场景', '雨夜 / 黄昏 / 清晨'],
+              ] as const
+            ).map(([value, label, hint]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => update({ backgroundMode: value })}
+                className={cn(
+                  'rounded-xl border px-3 py-3 text-left transition',
+                  settings.backgroundMode === value
+                    ? 'border-amber/45 bg-amber/[0.07]'
+                    : 'border-paper/8 bg-black/15 hover:border-paper/20',
+                )}
+              >
+                <span className="block text-[14px] text-paper/85">{label}</span>
+                <span className="mt-0.5 block text-[11px] text-paper/35">{hint}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[12px] text-paper/40">轮换</span>
+            {[
+              [5, '5 分钟'],
+              [10, '10 分钟'],
+              [15, '15 分钟'],
+              [0, '关闭'],
+            ].map(([value, label]) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => update({ galleryRotateMin: Number(value) })}
+                className={cn(
+                  'rounded-full border px-3 py-1.5 text-[12px] transition',
+                  settings.galleryRotateMin === value
+                    ? 'border-amber/40 text-amber/90'
+                    : 'border-paper/10 text-paper/45 hover:text-paper/75',
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <Toggle
+            label="随机顺序"
+            checked={settings.galleryShuffle}
+            onChange={(checked) => update({ galleryShuffle: checked })}
+          />
+        </Section>
+
+        <Section title="房间场景">
           <div className="grid gap-2 sm:grid-cols-3">
             {SCENES.map((scene) => (
               <button
@@ -157,12 +215,32 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
         </Section>
 
         <Section title="声音">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {AMBIENCE.map((track) => (
+              <button
+                key={track.id}
+                type="button"
+                onClick={() => update({ ambienceId: track.id })}
+                className={cn(
+                  'rounded-xl border px-2.5 py-2.5 text-left transition',
+                  settings.ambienceId === track.id
+                    ? 'border-amber/45 bg-amber/[0.07]'
+                    : 'border-paper/8 bg-black/15 hover:border-paper/20',
+                )}
+              >
+                <span className="block text-[13px] text-paper/85">{track.name}</span>
+                <span className="mt-0.5 block text-[10px] leading-snug text-paper/35">
+                  {track.description}
+                </span>
+              </button>
+            ))}
+          </div>
           <Toggle
-            label="雨声与环境音"
+            label="环境音"
             checked={settings.sound}
             onChange={(checked) => {
               update({ sound: checked })
-              if (checked) void ambience.start(settings.volume)
+              if (checked) void ambience.start(settings.volume, settings.ambienceId)
               else ambience.stop()
             }}
           />
@@ -184,6 +262,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           </label>
         </Section>
 
+        {!PURE_STUDY_ROOM && (
         <Section title="督学形象">
           <label className="block">
             <span className="text-[12px] tracking-wider text-paper/40">督学名字</span>
@@ -252,6 +331,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           </div>
 
         </Section>
+        )}
 
         <Section title="动效">
           <div className="flex gap-2">

@@ -15,6 +15,7 @@ interface ProgressStore {
   sessions: Session[]
   record: (session: Session) => RecordResult
   setOnboarded: () => void
+  hydrate: (progress: Progress, sessions: Session[]) => void
   reset: () => void
 }
 
@@ -37,6 +38,11 @@ export const useProgress = create<ProgressStore>((set, get) => ({
     const progress = { ...get().progress, onboarded: true }
     localRepository.saveProgress(progress)
     set({ progress })
+  },
+  hydrate: (progress, sessions) => {
+    localRepository.saveProgress(progress)
+    localRepository.saveSessions(sessions)
+    set({ progress, sessions: sessions.slice(0, 1000) })
   },
   reset: () => {
     localRepository.clearAll()
