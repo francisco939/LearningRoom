@@ -81,8 +81,9 @@ export class Ambience {
       return
     }
     this.audio = next
-    fadeElement(next, 0, this.volume, 900)
-    fadeElement(old, old.volume, 0, 700, () => old.pause())
+    // 先快速收掉旧音轨再让新音轨淡入：两段环境音叠在一起会被听成「混音」。
+    fadeElement(old, old.volume, 0, 150, () => old.pause())
+    fadeElement(next, 0, this.volume, 500)
   }
 
   setVolume(volume: number): void {

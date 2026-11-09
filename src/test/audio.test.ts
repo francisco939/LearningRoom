@@ -72,6 +72,20 @@ describe('Ambience', () => {
     expect(FakeAudio.instances[0].paused).toBe(true)
   })
 
+  it('切换音轨时旧音轨会很快淡出并暂停，不会和新音轨混在一起', async () => {
+    const ambience = new Ambience()
+
+    await ambience.start(0.5, 'rain')
+    const rain = FakeAudio.instances[0]
+    await ambience.start(0.5, 'cafe')
+    const cafe = FakeAudio.instances[1]
+
+    expect(cafe.paused).toBe(false)
+    vi.advanceTimersByTime(300)
+    expect(rain.paused).toBe(true)
+    expect(cafe.paused).toBe(false)
+  })
+
   it('stop 之后可以重新 start 播放', async () => {
     const ambience = new Ambience()
 
