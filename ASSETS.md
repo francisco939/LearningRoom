@@ -127,9 +127,10 @@ maskable 版本把头像缩到 410×410，居中放在 `#14100d` 背景上，留
 
 - **20 张静态图**：`public/gallery/images/01.webp … 20.webp`，Pexels 免费图库，16:9、1600×900、WebP。
 - **5 段 Pexels 动态**：`pexels-01 … 05`，Pexels 免费视频，6–8 秒、1280×720、H.264、无音轨。
-- **5 段用户动态**：`user-01 … 05`，由项目作者提供；同一规格，**当前待提供**，先用 poster 占位。
-- 视频成品在 R2 `gallery/videos/`，不提交仓库；poster 在 `public/gallery/posters/`。
+- **5 段用户动态**：`user-01 … 05`，由项目作者提供（美丽风景/动漫壁纸），已转码为 720p、8 秒、无音轨。
+- 10 段视频成品都在 `public/gallery/videos/`，随仓库发布；poster 在 `public/gallery/posters/`。
 - 处理脚本：[`scripts/prepare-gallery.py`](scripts/prepare-gallery.py)（裁切/压缩/转码/poster）；上传：[`scripts/upload-gallery.mjs`](scripts/upload-gallery.mjs)。
+- 后续可迁到 R2：设置 `VITE_MEDIA_BASE=https://media.learningroom.dpdns.org`；当前不依赖 Cloudflare 即可运行。
 - Pexels 许可允许免费使用；页面保留 credit/license 字段。作者可替换为同规格素材。
 
 ## 5. 巡查帧动画

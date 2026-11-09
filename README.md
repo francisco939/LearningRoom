@@ -8,7 +8,7 @@
 
 ## 这个分支有什么
 
-- **30 项动态图集**：20 张 Pexels 免费静图 + 5 段 Pexels 免费视频 + 5 段作者提供的动态壁纸（待提供）。默认 10 分钟自动轮换，可手动切换、随机、关闭。
+- **30 项动态图集**：20 张 Pexels 免费静图 + 5 段 Pexels 免费视频 + 5 段作者提供的美丽风景视频。默认 10 分钟自动轮换，可手动切换、随机、关闭。
 - **计时器下沉**：开始后 700ms 平滑缩到右下角；暂停或结束回到中央。右下角点击即可暂停并展开。
 - **5 套环境音**：雨、咖啡馆、图书馆、壁炉、夜；CC0 素材，crossfade、音量、开关，刷新后保留。
 - **账户系统**：游客优先；邮箱密码注册/验证/登录/找回/改密/删除/导出；登录后同步设置与专注记录。
@@ -85,14 +85,14 @@ npm run worker:test   # 需要 workerd 可正常启动
 
 - 静态图：`public/gallery/images/01.webp … 20.webp`
 - 视频 poster：`public/gallery/posters/`
-- 视频成品：R2 `gallery/videos/`；本地开发可临时放 `public/gallery/videos/`（已 gitignore）
+- 视频成品：`public/gallery/videos/`（5 段 Pexels + 5 段作者提供）；可选迁到 R2，设置 `VITE_MEDIA_BASE` 即可
 - 音频：`public/audio/ambience/{cafe,library,fireplace,night}.m4a` + 现有雨声
 - 处理/上传：`scripts/prepare-gallery.py`、`scripts/upload-gallery.mjs`
 
 ## 当前待办
 
-- [ ] 作者提供 5 段动态壁纸（`user-01 … 05`），当前用 poster 占位
-- [ ] Cloudflare D1/R2/DO/Resend 实际部署（需要账号登录与密钥）
+- [x] 5 段作者动态壁纸已接入（`public/gallery/videos/user-01 … 05.mp4`）
+- [ ] **TODO(cloudflare)**：D1/R2/DO/Resend 实际部署（需要账号登录与密钥；当前视频随仓库发布，不依赖 R2）
 - [ ] 交流区消息流（单房间、登录发言、200 字、限流、举报）——本期只做在线人数，代码留 TODO
 - [ ] 线上手工验收：注册→验证→登录→同步；两标签页在线人数
 - [ ] 移动端 390×844 适配复查

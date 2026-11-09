@@ -92,9 +92,9 @@ export function galleryIndex(id: string): number {
 
 export function gallerySrc(item: GalleryItem): string {
   const explicit = (import.meta.env.VITE_MEDIA_BASE as string | undefined)?.trim()
-  const media =
-    explicit ||
-    (import.meta.env.PROD ? 'https://media.learningroom.dpdns.org' : '')
+  // 默认使用仓库内视频，保证没有 Cloudflare/R2 时也能完整运行。
+  // 配好 R2 后再通过 VITE_MEDIA_BASE 切到 media 域名。
+  const media = explicit || ''
   const base = item.kind === 'video' && media ? media : import.meta.env.BASE_URL
   return `${base.replace(/\/?$/, '/')}${item.src}`
 }

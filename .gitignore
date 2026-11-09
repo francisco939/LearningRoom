@@ -7,7 +7,6 @@ coverage/
 Thumbs.db
 .probe
 assets-src/
-public/gallery/videos/
 .pydeps/
 .models/
 .pip-cache/
